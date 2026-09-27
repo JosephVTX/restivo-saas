@@ -31,6 +31,11 @@ class OrderController extends ApiController
                         $query->open();
                     }
                 }),
+                AllowedFilter::callback('mine', function (Builder $query, mixed $value) use ($request): void {
+                    if (filter_var($value, FILTER_VALIDATE_BOOLEAN)) {
+                        $query->where('waiter_id', $request->user()?->id);
+                    }
+                }),
                 AllowedFilter::callback('table', function (Builder $query, mixed $value): void {
                     $query->whereHas('diningTable', fn (Builder $query) => $query->where('uuid', $value));
                 }),
