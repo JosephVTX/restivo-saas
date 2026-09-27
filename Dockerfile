@@ -17,7 +17,7 @@ RUN pnpm build
 FROM composer:2 AS vendor
 WORKDIR /app
 COPY composer.json composer.lock ./
-RUN composer install --no-dev --no-scripts --prefer-dist --optimize-autoloader
+RUN composer install --no-dev --no-scripts --prefer-dist --optimize-autoloader --ignore-platform-req=ext-soap
 COPY . .
 RUN composer dump-autoload --optimize --no-dev
 
