@@ -4,8 +4,11 @@ namespace App\Http\Middleware;
 
 use App\Http\Resources\TenantResource;
 use App\Http\Resources\UserResource;
+use Closure;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 use Inertia\Middleware;
+use Symfony\Component\HttpFoundation\Response;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -15,6 +18,28 @@ class HandleInertiaRequests extends Middleware
      * @var string
      */
     protected $rootView = 'app';
+
+    /**
+     * Encrypt the page data that Inertia stores in the browser history for
+     * signed-in users, so privileged pages can't be replayed with the back
+     * button after logging out. Only enabled in secure contexts because the
+     * Web Crypto API is unavailable over plain HTTP.
+     */
+    public function handle(Request $request, Closure $next): Response
+    {
+        Inertia::encryptHistory($this->shouldEncryptHistory($request));
+
+        return parent::handle($request, $next);
+    }
+
+    private function shouldEncryptHistory(Request $request): bool
+    {
+        if ($request->user() === null) {
+            return false;
+        }
+
+        return $request->secure() || in_array($request->getHost(), ['localhost', '127.0.0.1'], true);
+    }
 
     /**
      * Determines the current asset version.
