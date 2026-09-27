@@ -89,6 +89,7 @@ final class TenantProvisioner
             'tables.view',
             'orders.view', 'orders.create', 'orders.update',
             'kitchen.view',
+            'payments.create',
             'customers.view',
         ],
         RoleEnum::Kitchen->value => [

@@ -4,22 +4,30 @@ import useSWR from 'swr';
 import AppLayout from '@/components/layout/AppLayout';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Modal, confirmDelete } from '@/components/ui/Modal';
+import { PaymentModal } from '@/components/ui/PaymentModal';
 import { StatusBadge } from '@/components/ui/StatusBadge';
+import { useCan } from '@/hooks/use-can';
 import { useResource } from '@/hooks/use-resource';
 import { api, fetcher } from '@/lib/http';
 import { cn } from '@/lib/utils';
 import type {
     DiningTable,
+    EnumOption,
     MenuData,
     MenuModifierGroup,
     MenuProduct,
     Order,
     OrderItem,
+    PaymentMethod,
     TableStatus,
     Zone,
 } from '@/types';
 
 type Mode = 'dine_in' | 'takeaway';
+
+interface Props {
+    paymentMethodOptions: EnumOption<PaymentMethod>[];
+}
 
 const tableCard: Record<TableStatus, string> = {
     available: 'border-success/50 bg-success/10',
@@ -41,8 +49,10 @@ function minutesSince(value: string | null): number {
     return Math.max(0, Math.floor((Date.now() - new Date(value).getTime()) / 60000));
 }
 
-export default function PosIndex() {
+export default function PosIndex({ paymentMethodOptions }: Props) {
     const { url } = usePage();
+    const can = useCan();
+    const canCharge = can('payments.create');
     const initialOrderUuid = useMemo(() => {
         const query = url.split('?')[1] ?? '';
 
@@ -53,6 +63,7 @@ export default function PosIndex() {
     const [selectedUuid, setSelectedUuid] = useState<string | null>(initialOrderUuid);
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [activeProduct, setActiveProduct] = useState<MenuProduct | null>(null);
+    const [payingOrder, setPayingOrder] = useState<Order | null>(null);
     const [selections, setSelections] = useState<Record<string, string[]>>({});
     const [saving, setSaving] = useState(false);
     const [search, setSearch] = useState('');
@@ -644,6 +655,16 @@ export default function PosIndex() {
                             >
                                 <i className="fa-solid fa-paper-plane" aria-hidden="true" /> Enviar a cocina
                             </button>
+                            {canCharge ? (
+                                <button
+                                    type="button"
+                                    className="btn btn-secondary"
+                                    onClick={() => setPayingOrder(order)}
+                                    disabled={(order.items ?? []).length === 0}
+                                >
+                                    <i className="fa-solid fa-cash-register" aria-hidden="true" /> Cobrar
+                                </button>
+                            ) : null}
                             <button type="button" className="btn btn-ghost" onClick={backToTables}>
                                 <i className="fa-solid fa-arrow-left" aria-hidden="true" /> Volver a mesas
                             </button>
@@ -765,6 +786,16 @@ export default function PosIndex() {
                                 >
                                     <i className="fa-solid fa-paper-plane" aria-hidden="true" /> Enviar
                                 </button>
+                                {canCharge ? (
+                                    <button
+                                        type="button"
+                                        className="btn btn-secondary btn-sm gap-1"
+                                        onClick={() => setPayingOrder(order)}
+                                        disabled={(order.items ?? []).length === 0}
+                                    >
+                                        <i className="fa-solid fa-cash-register" aria-hidden="true" /> Cobrar
+                                    </button>
+                                ) : null}
                             </div>
                         </div>
                     </div>
@@ -824,6 +855,16 @@ export default function PosIndex() {
                     ))}
                 </div>
             </Modal>
+
+            <PaymentModal
+                key={payingOrder?.uuid ?? 'closed'}
+                order={payingOrder}
+                paymentMethodOptions={paymentMethodOptions}
+                onClose={() => setPayingOrder(null)}
+                onPaid={() => {
+                    void refreshOrder();
+                }}
+            />
         </AppLayout>
     );
 }

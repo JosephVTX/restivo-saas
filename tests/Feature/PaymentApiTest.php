@@ -145,6 +145,28 @@ class PaymentApiTest extends TestCase
         ])->assertStatus(422);
     }
 
+    public function test_a_waiter_can_collect_a_payment_at_the_table(): void
+    {
+        $tenant = $this->createTenant('Payment Waiter');
+        $order = Order::factory()->create([
+            'tenant_id' => $tenant->id,
+            'status' => OrderStatus::Open,
+            'total' => 42,
+        ]);
+
+        $this->actingAsMember($tenant, 'waiter');
+
+        $this->postJson('/api/v1/orders/'.$order->uuid.'/payments', [
+            'method' => 'cash',
+            'amount' => 42,
+            'received_amount' => 50,
+        ])
+            ->assertCreated()
+            ->assertJsonPath('data.change_amount', '8.00');
+
+        $this->assertDatabaseHas('orders', ['id' => $order->id, 'status' => 'paid']);
+    }
+
     public function test_payment_permissions_are_enforced(): void
     {
         $tenant = $this->createTenant('Payment Denied');

@@ -6,14 +6,14 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { Field } from '@/components/ui/Field';
 import { Modal } from '@/components/ui/Modal';
 import { PageHeader } from '@/components/ui/PageHeader';
+import { PaymentModal } from '@/components/ui/PaymentModal';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { useCan } from '@/hooks/use-can';
 import { useResource } from '@/hooks/use-resource';
 import { api, fetcher, validationErrors } from '@/lib/http';
-import { cashMovementTypeLabel, paymentMethodLabel } from '@/lib/labels';
+import { cashMovementTypeLabel } from '@/lib/labels';
 import { cn, formatDate } from '@/lib/utils';
 import { cashMovementSchema, closeCashSessionSchema, openCashSessionSchema } from '@/schemas/cash';
-import { paymentSchema } from '@/schemas/payment';
 import type {
     CashMovement,
     CashMovementType,
@@ -30,15 +30,6 @@ interface Props {
     cashMovementTypeOptions: EnumOption<CashMovementType>[];
     cashSessionStatusOptions: EnumOption<CashSessionStatus>[];
 }
-
-const methodIcons: Record<PaymentMethod, string> = {
-    cash: 'fa-money-bill-wave',
-    yape: 'fa-mobile-screen-button',
-    plin: 'fa-mobile-screen-button',
-    card: 'fa-credit-card',
-    transfer: 'fa-building-columns',
-    other: 'fa-ellipsis',
-};
 
 function formatPrice(value: string | number | null | undefined): string {
     return `S/ ${Number(value ?? 0).toFixed(2)}`;
@@ -110,17 +101,6 @@ export default function CashIndex({ paymentMethodOptions, cashMovementTypeOption
     const [savingMovement, setSavingMovement] = useState(false);
 
     const [payingOrder, setPayingOrder] = useState<Order | null>(null);
-    const [payMethod, setPayMethod] = useState<PaymentMethod>('cash');
-    const [payAmount, setPayAmount] = useState('');
-    const [payTip, setPayTip] = useState('');
-    const [payReceived, setPayReceived] = useState('');
-    const [payReference, setPayReference] = useState('');
-    const [payNotes, setPayNotes] = useState('');
-    const [payErrors, setPayErrors] = useState<Record<string, string>>({});
-    const [paySaving, setPaySaving] = useState(false);
-
-    const cashChange =
-        payMethod === 'cash' && payReceived !== '' ? Number(payReceived) - Number(payAmount || 0) : null;
 
     const openSession = async () => {
         const parsed = openCashSessionSchema.safeParse({ opening_amount: openAmount, notes: openNotes });
@@ -226,55 +206,6 @@ export default function CashIndex({ paymentMethodOptions, cashMovementTypeOption
 
     const openPayment = (order: Order) => {
         setPayingOrder(order);
-        setPayMethod('cash');
-        setPayAmount(Number(order.remaining).toFixed(2));
-        setPayTip('');
-        setPayReceived('');
-        setPayReference('');
-        setPayNotes('');
-        setPayErrors({});
-    };
-
-    const submitPayment = async () => {
-        if (!payingOrder) {
-            return;
-        }
-
-        const parsed = paymentSchema.safeParse({
-            method: payMethod,
-            amount: payAmount,
-            tip: payTip === '' ? undefined : payTip,
-            received_amount: payMethod === 'cash' && payReceived !== '' ? payReceived : undefined,
-            reference: payReference,
-            notes: payNotes,
-        });
-
-        if (!parsed.success) {
-            setPayErrors(Object.fromEntries(parsed.error.issues.map((issue) => [String(issue.path[0]), issue.message])));
-
-            return;
-        }
-
-        setPaySaving(true);
-        setPayErrors({});
-
-        try {
-            await api.post(`/api/v1/orders/${payingOrder.uuid}/payments`, parsed.data);
-            const result = await orders.mutate();
-            await mutateCash();
-
-            const updated = result?.data.find((order) => order.uuid === payingOrder.uuid) ?? null;
-
-            if (!updated || Number(updated.remaining) <= 0.001) {
-                setPayingOrder(null);
-            } else {
-                openPayment(updated);
-            }
-        } catch (error) {
-            setPayErrors(errorsFor(error));
-        } finally {
-            setPaySaving(false);
-        }
     };
 
     return (
@@ -653,126 +584,17 @@ export default function CashIndex({ paymentMethodOptions, cashMovementTypeOption
                 </div>
             </Modal>
 
-            <Modal
-                open={payingOrder !== null}
-                title={payingOrder ? `Cobrar pedido #${payingOrder.number}` : 'Cobrar'}
-                description="Registra un pago total o dividido."
+            <PaymentModal
+                key={payingOrder?.uuid ?? 'closed'}
+                order={payingOrder}
+                paymentMethodOptions={paymentMethodOptions}
                 onClose={() => setPayingOrder(null)}
-                footer={
-                    <>
-                        <button type="button" className="btn btn-ghost" onClick={() => setPayingOrder(null)}>
-                            Cancelar
-                        </button>
-                        <button type="button" className="btn btn-primary" disabled={paySaving} onClick={submitPayment}>
-                            {paySaving ? <span className="loading loading-spinner" /> : null}
-                            Cobrar {formatPrice(payAmount)}
-                        </button>
-                    </>
-                }
-            >
-                <div className="space-y-3">
-                    {payErrors.message ? (
-                        <div className="alert alert-error">
-                            <i className="fa-solid fa-circle-exclamation" aria-hidden="true" />
-                            <span>{payErrors.message}</span>
-                        </div>
-                    ) : null}
+                onPaid={() => {
+                    void orders.mutate();
+                    void mutateCash();
+                }}
+            />
 
-                    {payingOrder ? (
-                        <div className="rounded-box bg-base-200 px-3 py-2 text-sm">
-                            <div className="flex justify-between">
-                                <span className="opacity-70">Saldo pendiente</span>
-                                <span className="font-semibold tabular-nums">{formatPrice(payingOrder.remaining)}</span>
-                            </div>
-                        </div>
-                    ) : null}
-
-                    <div>
-                        <p className="mb-1 text-sm font-medium">Método de pago</p>
-                        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                            {paymentMethodOptions.map((option) => (
-                                <button
-                                    key={option.value}
-                                    type="button"
-                                    className={cn(
-                                        'btn h-16 flex-col gap-1 text-sm',
-                                        payMethod === option.value && 'btn-primary',
-                                    )}
-                                    onClick={() => setPayMethod(option.value)}
-                                >
-                                    <i className={`fa-solid ${methodIcons[option.value]}`} aria-hidden="true" />
-                                    {paymentMethodLabel(option.value) || option.label}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    <Field label="Monto (S/)" error={payErrors.amount}>
-                        <input
-                            type="number"
-                            min="0"
-                            step="0.10"
-                            inputMode="decimal"
-                            className="input input-lg w-full text-2xl"
-                            value={payAmount}
-                            onChange={(event) => setPayAmount(event.target.value)}
-                        />
-                    </Field>
-
-                    <Field label="Propina (S/)" error={payErrors.tip}>
-                        <input
-                            type="number"
-                            min="0"
-                            step="0.10"
-                            inputMode="decimal"
-                            className="input w-full"
-                            value={payTip}
-                            onChange={(event) => setPayTip(event.target.value)}
-                        />
-                    </Field>
-
-                    {payMethod === 'cash' ? (
-                        <Field label="Monto recibido (S/)" error={payErrors.received_amount}>
-                            <input
-                                type="number"
-                                min="0"
-                                step="0.10"
-                                inputMode="decimal"
-                                className="input input-lg w-full text-2xl"
-                                value={payReceived}
-                                onChange={(event) => setPayReceived(event.target.value)}
-                            />
-                            {cashChange !== null ? (
-                                <p
-                                    className={cn(
-                                        'mt-1 text-lg font-semibold tabular-nums',
-                                        cashChange < 0 ? 'text-error' : 'text-success',
-                                    )}
-                                >
-                                    Vuelto: {formatPrice(cashChange)}
-                                </p>
-                            ) : null}
-                        </Field>
-                    ) : null}
-
-                    <Field label="Referencia (opcional)" error={payErrors.reference}>
-                        <input
-                            className="input w-full"
-                            value={payReference}
-                            onChange={(event) => setPayReference(event.target.value)}
-                        />
-                    </Field>
-
-                    <Field label="Nota (opcional)" error={payErrors.notes}>
-                        <textarea
-                            className="textarea w-full"
-                            rows={2}
-                            value={payNotes}
-                            onChange={(event) => setPayNotes(event.target.value)}
-                        />
-                    </Field>
-                </div>
-            </Modal>
         </AppLayout>
     );
 }
