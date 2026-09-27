@@ -83,11 +83,10 @@ export function AppShell({
                                         </Link>
                                     </li>
                                 ) : null}
-                                {auth.user?.is_super_admin ? (
+                                {variant === 'app' && auth.user?.is_super_admin ? (
                                     <li>
-                                        <Link href={variant === 'admin' ? '/app' : '/admin'} prefetch>
-                                            <i className="fa-solid fa-shuffle" aria-hidden="true" />
-                                            {variant === 'admin' ? 'Ir al espacio de trabajo' : 'Panel de administración'}
+                                        <Link href="/admin" prefetch>
+                                            <i className="fa-solid fa-shuffle" aria-hidden="true" /> Panel de administración
                                         </Link>
                                     </li>
                                 ) : null}
@@ -102,6 +101,24 @@ export function AppShell({
                 </header>
 
                 <main className="mx-auto w-full max-w-7xl flex-1 p-4 lg:p-8">
+                    {variant === 'app' && auth.user?.is_super_admin && tenant ? (
+                        <div
+                            role="alert"
+                            className="alert mb-4 items-center gap-3 rounded-box border border-info/40 bg-info/10 py-2 text-sm"
+                        >
+                            <i className="fa-solid fa-user-shield" aria-hidden="true" />
+                            <span className="flex-1">
+                                Estás viendo <strong>{tenant.name}</strong> como super administrador.
+                            </span>
+                            <button
+                                type="button"
+                                className="btn btn-ghost btn-xs"
+                                onClick={() => router.post('/admin/leave')}
+                            >
+                                Salir
+                            </button>
+                        </div>
+                    ) : null}
                     {variant === 'app' ? <ExpiryNotice /> : null}
                     {children}
                 </main>

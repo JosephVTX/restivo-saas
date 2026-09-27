@@ -73,6 +73,8 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'super-admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', AdminDashboardController::class)->name('dashboard');
     Route::get('tenants', [AdminTenantController::class, 'index'])->name('tenants.index');
+    Route::post('tenants/{tenant}/enter', [AdminTenantController::class, 'enter'])->name('tenants.enter');
+    Route::post('leave', [AdminTenantController::class, 'leave'])->name('leave');
     Route::get('users', [AdminUserController::class, 'index'])->name('users.index');
     Route::get('settings/integrations', [AdminPlatformSettingController::class, 'edit'])->name('settings.integrations');
 });

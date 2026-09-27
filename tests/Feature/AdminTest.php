@@ -129,4 +129,41 @@ class AdminTest extends TestCase
         $this->assertTrue($tenant->isActive());
         $this->assertFalse($tenant->hasExpired());
     }
+
+    public function test_a_super_admin_enters_and_leaves_a_tenant_workspace(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $this->actingAs(User::factory()->superAdmin()->create());
+
+        $this->post('/admin/tenants/'.$tenant->uuid.'/enter')
+            ->assertRedirect(route('app.dashboard'));
+
+        $this->assertSame($tenant->getKey(), session(config('tenancy.session_key', 'tenant_id')));
+
+        $this->get('/app')->assertOk();
+
+        $this->post('/admin/leave')->assertRedirect(route('admin.dashboard'));
+
+        $this->assertNull(session(config('tenancy.session_key', 'tenant_id')));
+    }
+
+    public function test_a_super_admin_cannot_enter_an_inactive_tenant(): void
+    {
+        $tenant = Tenant::factory()->create(['status' => TenantStatus::Suspended]);
+        $this->actingAs(User::factory()->superAdmin()->create());
+
+        $this->from('/admin/tenants')
+            ->post('/admin/tenants/'.$tenant->uuid.'/enter')
+            ->assertRedirect('/admin/tenants')
+            ->assertSessionHas('error');
+    }
+
+    public function test_regular_members_cannot_use_the_admin_workspace_switch(): void
+    {
+        $tenant = $this->createTenant('Plain');
+        $this->actingAsMember($tenant, 'owner');
+
+        $this->post('/admin/tenants/'.$tenant->uuid.'/enter')->assertForbidden();
+        $this->post('/admin/leave')->assertForbidden();
+    }
 }

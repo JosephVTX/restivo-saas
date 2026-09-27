@@ -1,4 +1,4 @@
-import { Head } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import AdminLayout from '@/components/layout/AdminLayout';
 import { Field } from '@/components/ui/Field';
@@ -240,14 +240,24 @@ export default function Tenants({ statuses, durations }: Props) {
                             <td>
                                 <RowActions
                                     extra={
-                                        <button
-                                            type="button"
-                                            className="btn btn-ghost btn-xs"
-                                            title="Otorgar acceso"
-                                            onClick={() => openGrant(tenant)}
-                                        >
-                                            <i className="fa-solid fa-user-plus" aria-hidden="true" />
-                                        </button>
+                                        <>
+                                            <button
+                                                type="button"
+                                                className="btn btn-ghost btn-xs"
+                                                title="Entrar al espacio de trabajo"
+                                                onClick={() => router.post(`/admin/tenants/${tenant.uuid}/enter`)}
+                                            >
+                                                <i className="fa-solid fa-arrow-right-to-bracket" aria-hidden="true" />
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className="btn btn-ghost btn-xs"
+                                                title="Otorgar acceso"
+                                                onClick={() => openGrant(tenant)}
+                                            >
+                                                <i className="fa-solid fa-user-plus" aria-hidden="true" />
+                                            </button>
+                                        </>
                                     }
                                     onEdit={() => openEdit(tenant)}
                                     onDelete={() => remove(tenant)}
