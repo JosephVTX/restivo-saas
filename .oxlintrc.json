@@ -1,0 +1,23 @@
+{
+    "$schema": "./node_modules/oxlint/configuration_schema.json",
+    "plugins": ["react", "typescript", "import", "unicorn"],
+    "categories": {
+        "correctness": "error",
+        "suspicious": "warn"
+    },
+    "env": {
+        "browser": true,
+        "es2024": true
+    },
+    "rules": {
+        "no-unused-vars": "error",
+        "no-console": "warn",
+        "react/react-in-jsx-scope": "off"
+    },
+    "ignorePatterns": [
+        "vendor",
+        "node_modules",
+        "public/build",
+        "storage"
+    ]
+}

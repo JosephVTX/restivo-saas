@@ -1,0 +1,101 @@
+@import "tailwindcss";
+
+@plugin "daisyui" {
+    themes: restivo --default, restivo-dark --prefersdark;
+}
+
+/* ---------------------------------------------------------------------------
+ | Custom brand theme — daisyUI v5 (CSS-first, no tailwind.config.js)
+ | Light
+ -------------------------------------------------------------------------- */
+@plugin "daisyui/theme" {
+    name: "restivo";
+    default: true;
+    color-scheme: light;
+
+    --color-base-100: oklch(100% 0 0);
+    --color-base-200: oklch(97.5% 0.006 275);
+    --color-base-300: oklch(93.5% 0.01 275);
+    --color-base-content: oklch(28% 0.03 275);
+
+    --color-primary: oklch(55% 0.2 275);
+    --color-primary-content: oklch(98% 0.01 275);
+    --color-secondary: oklch(62% 0.14 205);
+    --color-secondary-content: oklch(98% 0.01 205);
+    --color-accent: oklch(66% 0.19 330);
+    --color-accent-content: oklch(98% 0.01 330);
+    --color-neutral: oklch(32% 0.03 275);
+    --color-neutral-content: oklch(97% 0.01 275);
+
+    --color-info: oklch(62% 0.14 240);
+    --color-info-content: oklch(98% 0.01 240);
+    --color-success: oklch(62% 0.16 152);
+    --color-success-content: oklch(98% 0.01 152);
+    --color-warning: oklch(78% 0.15 82);
+    --color-warning-content: oklch(28% 0.06 82);
+    --color-error: oklch(60% 0.2 25);
+    --color-error-content: oklch(98% 0.01 25);
+
+    --radius-selector: 0.5rem;
+    --radius-field: 0.5rem;
+    --radius-box: 0.85rem;
+    --size-selector: 0.25rem;
+    --size-field: 0.25rem;
+    --border: 1px;
+    --depth: 1;
+    --noise: 0;
+}
+
+/* ---------------------------------------------------------------------------
+ | Custom brand theme — daisyUI v5
+ | Dark
+ -------------------------------------------------------------------------- */
+@plugin "daisyui/theme" {
+    name: "restivo-dark";
+    prefersdark: true;
+    color-scheme: dark;
+
+    --color-base-100: oklch(21% 0.025 275);
+    --color-base-200: oklch(18% 0.025 275);
+    --color-base-300: oklch(15% 0.025 275);
+    --color-base-content: oklch(93% 0.01 275);
+
+    --color-primary: oklch(72% 0.16 275);
+    --color-primary-content: oklch(20% 0.04 275);
+    --color-secondary: oklch(72% 0.12 205);
+    --color-secondary-content: oklch(18% 0.03 205);
+    --color-accent: oklch(75% 0.15 330);
+    --color-accent-content: oklch(20% 0.04 330);
+    --color-neutral: oklch(30% 0.025 275);
+    --color-neutral-content: oklch(93% 0.01 275);
+
+    --color-info: oklch(72% 0.12 240);
+    --color-info-content: oklch(18% 0.03 240);
+    --color-success: oklch(72% 0.14 152);
+    --color-success-content: oklch(18% 0.03 152);
+    --color-warning: oklch(80% 0.14 82);
+    --color-warning-content: oklch(25% 0.05 82);
+    --color-error: oklch(68% 0.18 25);
+    --color-error-content: oklch(18% 0.03 25);
+
+    --radius-selector: 0.5rem;
+    --radius-field: 0.5rem;
+    --radius-box: 0.85rem;
+    --size-selector: 0.25rem;
+    --size-field: 0.25rem;
+    --border: 1px;
+    --depth: 1;
+    --noise: 0;
+}
+
+@theme {
+    --font-sans: "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-feature-settings: "cv02", "cv03", "cv04";
+}
