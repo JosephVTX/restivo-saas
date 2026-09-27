@@ -15,16 +15,29 @@ import { useResource } from '@/hooks/use-resource';
 import { api, validationErrors } from '@/lib/http';
 import { formatDate } from '@/lib/utils';
 import { tenantAccessSchema, tenantSchema, type TenantAccessValues, type TenantValues } from '@/schemas/tenant';
-import type { EnumOption, Tenant, TenantStatus } from '@/types';
+import type { EnumOption, PlanDuration, PlanDurationOption, Tenant, TenantStatus } from '@/types';
 
 interface Props {
     statuses: EnumOption<TenantStatus>[];
+    durations: PlanDurationOption[];
 }
 
-const emptyTenant: TenantValues = { name: '', plan: '', status: 'active', locale: 'es' };
+const emptyTenant: TenantValues = { name: '', status: 'active', locale: 'es', duration: '' };
 const emptyAccess: TenantAccessValues = { name: '', email: '', password: '' };
 
-export default function Tenants({ statuses }: Props) {
+function previewEndDate(duration: PlanDuration): string {
+    const date = new Date();
+
+    if (duration.endsWith('_month') || duration.endsWith('_months')) {
+        date.setMonth(date.getMonth() + Number.parseInt(duration, 10));
+    } else {
+        date.setDate(date.getDate() + Number.parseInt(duration, 10));
+    }
+
+    return formatDate(date.toISOString());
+}
+
+export default function Tenants({ statuses, durations }: Props) {
     const { search, query, change, page, setPage } = useDebouncedSearch();
     const [status, setStatus] = useState('');
     const { items: tenants, meta, isLoading, mutate } = useResource<Tenant>('/api/v1/admin/tenants', {
@@ -58,9 +71,9 @@ export default function Tenants({ statuses }: Props) {
         setEditing(tenant);
         setValues({
             name: tenant.name,
-            plan: tenant.plan ?? '',
             status: tenant.status,
             locale: tenant.locale === 'en' ? 'en' : 'es',
+            duration: '',
         });
         reset();
         setCreateOpen(true);
@@ -104,13 +117,16 @@ export default function Tenants({ statuses }: Props) {
         setSaving(true);
         setErrors({});
 
+        const { duration, ...rest } = parsed.data;
+        const payload = duration ? { ...rest, duration } : rest;
+
         try {
             if (editing) {
-                await api.patch(`/api/v1/admin/tenants/${editing.uuid}`, parsed.data);
+                await api.patch(`/api/v1/admin/tenants/${editing.uuid}`, payload);
                 setCreateOpen(false);
             } else {
                 const response = await api.post<{ temporary_password: string | null }>('/api/v1/admin/tenants', {
-                    ...parsed.data,
+                    ...payload,
                     owner_name: access.name,
                     owner_email: access.email,
                     owner_password: access.password || undefined,
@@ -189,7 +205,7 @@ export default function Tenants({ statuses }: Props) {
 
             <div className="mt-4">
                 <TableShell
-                    head={['Cliente', 'Estado', 'Plan', 'Miembros', 'Creado', '']}
+                    head={['Cliente', 'Estado', 'Miembros', 'Creado', '']}
                     isLoading={isLoading}
                     isEmpty={tenants.length === 0}
                 >
@@ -201,8 +217,24 @@ export default function Tenants({ statuses }: Props) {
                             </td>
                             <td>
                                 <StatusBadge status={tenant.status} label={tenant.status_label} />
+                                {tenant.expires_at ? (
+                                    <div
+                                        className={`text-xs ${
+                                            tenant.has_expired
+                                                ? 'text-error'
+                                                : tenant.is_expiring_soon
+                                                  ? 'text-warning'
+                                                  : 'opacity-60'
+                                        }`}
+                                    >
+                                        {tenant.has_expired
+                                            ? 'Vencido'
+                                            : tenant.is_expiring_soon
+                                              ? `Vence en ${tenant.days_until_expiry} día(s)`
+                                              : `Vence ${formatDate(tenant.expires_at)}`}
+                                    </div>
+                                ) : null}
                             </td>
-                            <td className="capitalize">{tenant.plan ?? '—'}</td>
                             <td className="tabular-nums">{tenant.members_count ?? 0}</td>
                             <td className="text-sm opacity-70">{formatDate(tenant.created_at)}</td>
                             <td>
@@ -272,30 +304,70 @@ export default function Tenants({ statuses }: Props) {
                             />
                         </Field>
 
-                        <div className="grid grid-cols-2 gap-3">
-                            <Field label="Plan">
-                                <input
-                                    className="input w-full"
-                                    value={values.plan}
-                                    onChange={(event) => setValues({ ...values, plan: event.target.value })}
-                                />
-                            </Field>
-                            <Field label="Estado">
-                                <select
-                                    className="select w-full"
-                                    value={values.status}
-                                    onChange={(event) =>
-                                        setValues({ ...values, status: event.target.value as TenantValues['status'] })
-                                    }
-                                >
-                                    {statuses.map((option) => (
-                                        <option key={option.value} value={option.value}>
-                                            {option.label}
-                                        </option>
-                                    ))}
-                                </select>
-                            </Field>
-                        </div>
+                        <Field label="Estado">
+                            <select
+                                className="select w-full"
+                                value={values.status}
+                                onChange={(event) =>
+                                    setValues({ ...values, status: event.target.value as TenantValues['status'] })
+                                }
+                            >
+                                {statuses.map((option) => (
+                                    <option key={option.value} value={option.value}>
+                                        {option.label}
+                                    </option>
+                                ))}
+                            </select>
+                        </Field>
+
+                        <Field
+                            label="Periodo de servicio"
+                            error={errors.duration}
+                            hint={
+                                values.duration
+                                    ? `Vencerá el ${previewEndDate(values.duration as PlanDuration)}.`
+                                    : editing
+                                      ? `Actual: ${editing.expires_at ? formatDate(editing.expires_at) : 'sin vencimiento'}. Elige un periodo para renovarlo.`
+                                      : 'Elige un periodo de prueba o un plan de pago.'
+                            }
+                        >
+                            <select
+                                className="select w-full"
+                                value={values.duration ?? ''}
+                                onChange={(event) => {
+                                    const duration = event.target.value as PlanDuration | '';
+                                    const option = durations.find((item) => item.value === duration);
+
+                                    setValues({
+                                        ...values,
+                                        duration,
+                                        status: option ? (option.is_trial ? 'trial' : 'active') : values.status,
+                                    });
+                                }}
+                            >
+                                <option value="">
+                                    {editing ? 'No cambiar' : 'Sin periodo (no vence)'}
+                                </option>
+                                <optgroup label="Prueba">
+                                    {durations
+                                        .filter((option) => option.is_trial)
+                                        .map((option) => (
+                                            <option key={option.value} value={option.value}>
+                                                {option.label}
+                                            </option>
+                                        ))}
+                                </optgroup>
+                                <optgroup label="Plan de pago">
+                                    {durations
+                                        .filter((option) => !option.is_trial)
+                                        .map((option) => (
+                                            <option key={option.value} value={option.value}>
+                                                {option.label}
+                                            </option>
+                                        ))}
+                                </optgroup>
+                            </select>
+                        </Field>
 
                         {!editing ? (
                             <>

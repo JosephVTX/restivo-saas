@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Models\Tenant;
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
@@ -44,7 +46,31 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        $user = Auth::user();
+
+        if ($user !== null && ! $user->isSuperAdmin() && $this->isLockedOut($user)) {
+            Auth::guard('web')->logout();
+            RateLimiter::hit($this->throttleKey());
+
+            throw ValidationException::withMessages([
+                'email' => __('auth.service_expired'),
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
+    }
+
+    /**
+     * A user is locked out when every workspace they belong to is inactive
+     * (suspended, cancelled or an expired trial). Users without any workspace
+     * are left alone so tenant resolution can handle them as before.
+     */
+    private function isLockedOut(User $user): bool
+    {
+        $tenants = $user->tenants()->get();
+
+        return $tenants->isNotEmpty()
+            && $tenants->doesntContain(fn (Tenant $tenant) => $tenant->isActive());
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Enums\PlanDuration;
 use App\Enums\TenantStatus;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -24,6 +25,7 @@ class UpdateTenantRequest extends FormRequest
             'plan' => ['sometimes', 'nullable', 'string', 'max:100'],
             'locale' => ['sometimes', 'string', 'max:10'],
             'status' => ['sometimes', Rule::enum(TenantStatus::class)],
+            'duration' => ['sometimes', 'nullable', Rule::enum(PlanDuration::class)],
         ];
     }
 }

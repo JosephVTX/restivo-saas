@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
-#[Fillable(['name', 'slug', 'status', 'plan', 'locale', 'settings', 'trial_ends_at', 'suspended_at'])]
+#[Fillable(['name', 'slug', 'status', 'plan', 'locale', 'settings', 'expires_at', 'suspended_at'])]
 class Tenant extends Model
 {
     /** @use HasFactory<TenantFactory> */
@@ -37,7 +37,7 @@ class Tenant extends Model
         return [
             'status' => TenantStatus::class,
             'settings' => 'array',
-            'trial_ends_at' => 'datetime',
+            'expires_at' => 'datetime',
             'suspended_at' => 'datetime',
         ];
     }
@@ -87,7 +87,42 @@ class Tenant extends Model
 
     public function isActive(): bool
     {
-        return $this->status?->isUsable() ?? false;
+        return ($this->status?->isUsable() ?? false) && ! $this->hasExpired();
+    }
+
+    public function isOnTrial(): bool
+    {
+        return $this->status === TenantStatus::Trial;
+    }
+
+    public function hasExpired(): bool
+    {
+        return ($this->status?->isUsable() ?? false)
+            && $this->expires_at !== null
+            && $this->expires_at->isPast();
+    }
+
+    public function isExpiringSoon(int $days = 7): bool
+    {
+        $remaining = $this->daysUntilExpiry();
+
+        return ($this->status?->isUsable() ?? false)
+            && $remaining !== null
+            && $remaining >= 0
+            && $remaining <= $days;
+    }
+
+    /**
+     * Whole days until the period ends; negative when already expired, null
+     * when the tenant has no end date.
+     */
+    public function daysUntilExpiry(): ?int
+    {
+        if ($this->expires_at === null) {
+            return null;
+        }
+
+        return (int) now()->startOfDay()->diffInDays($this->expires_at->startOfDay(), false);
     }
 
     public function isSuspended(): bool

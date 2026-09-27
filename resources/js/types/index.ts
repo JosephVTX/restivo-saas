@@ -1,4 +1,12 @@
 export type TenantStatus = 'active' | 'trial' | 'suspended' | 'cancelled';
+export type PlanDuration = '7_days' | '14_days' | '30_days' | '1_month' | '3_months' | '6_months' | '12_months';
+
+export interface PlanDurationOption {
+    value: PlanDuration;
+    label: string;
+    is_trial: boolean;
+}
+
 export type RoleName = 'owner' | 'admin' | 'member';
 
 export interface User {
@@ -23,7 +31,10 @@ export interface Tenant {
     plan: string | null;
     locale: string;
     settings: Record<string, unknown> | null;
-    trial_ends_at: string | null;
+    expires_at: string | null;
+    days_until_expiry: number | null;
+    is_expiring_soon: boolean;
+    has_expired: boolean;
     suspended_at: string | null;
     members_count?: number;
     created_at: string;

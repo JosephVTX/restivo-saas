@@ -1,6 +1,7 @@
 import { Link, router } from '@inertiajs/react';
 import type { ReactNode } from 'react';
 import { TenantSwitcher } from '@/components/layout/TenantSwitcher';
+import { ExpiryNotice } from '@/components/ui/ExpiryNotice';
 import { FlashToasts } from '@/components/ui/FlashToasts';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { useShared } from '@/hooks/use-shared';
@@ -100,7 +101,10 @@ export function AppShell({
                     </div>
                 </header>
 
-                <main className="mx-auto w-full max-w-7xl flex-1 p-4 lg:p-8">{children}</main>
+                <main className="mx-auto w-full max-w-7xl flex-1 p-4 lg:p-8">
+                    {variant === 'app' ? <ExpiryNotice /> : null}
+                    {children}
+                </main>
 
                 <footer className="mx-auto w-full max-w-7xl px-6 py-4 text-xs opacity-50">
                     {app.name} · {variant === 'admin' ? 'Panel de plataforma' : 'Espacio de trabajo'}

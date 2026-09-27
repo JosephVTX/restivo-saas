@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1\Admin;
 
+use App\Enums\PlanDuration;
 use App\Enums\TenantStatus;
 use App\Http\Controllers\Api\V1\ApiController;
 use App\Http\Requests\Admin\GrantAccessRequest;
@@ -41,6 +42,13 @@ class TenantController extends ApiController
     public function store(StoreTenantRequest $request): JsonResponse
     {
         $data = $request->safe()->only(['name', 'slug', 'plan', 'locale', 'status']);
+
+        if ($request->filled('duration')) {
+            $duration = $request->enum('duration', PlanDuration::class);
+            $data['expires_at'] = $duration->expiresAt();
+            $data['status'] = $duration->isTrial() ? TenantStatus::Trial : TenantStatus::Active;
+        }
+
         $data['status'] ??= TenantStatus::Active;
 
         $tenant = Tenant::create($data);
@@ -67,7 +75,15 @@ class TenantController extends ApiController
 
     public function update(UpdateTenantRequest $request, Tenant $tenant): TenantResource
     {
-        $tenant->update($request->validated());
+        $data = $request->safe()->except('duration');
+
+        if ($request->filled('duration')) {
+            $duration = $request->enum('duration', PlanDuration::class);
+            $data['expires_at'] = $duration->expiresAt();
+            $data['status'] = $duration->isTrial() ? TenantStatus::Trial : TenantStatus::Active;
+        }
+
+        $tenant->update($data);
 
         return new TenantResource($tenant);
     }

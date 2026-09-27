@@ -35,7 +35,31 @@ class TenantFactory extends Factory
     {
         return $this->state(fn (): array => [
             'status' => TenantStatus::Trial,
-            'trial_ends_at' => now()->addDays(14),
+            'expires_at' => now()->addDays(14),
+        ]);
+    }
+
+    public function expiredTrial(): static
+    {
+        return $this->state(fn (): array => [
+            'status' => TenantStatus::Trial,
+            'expires_at' => now()->subDay(),
+        ]);
+    }
+
+    public function expiringSoon(int $days = 3): static
+    {
+        return $this->state(fn (): array => [
+            'status' => TenantStatus::Trial,
+            'expires_at' => now()->addDays($days),
+        ]);
+    }
+
+    public function expiredPaid(): static
+    {
+        return $this->state(fn (): array => [
+            'status' => TenantStatus::Active,
+            'expires_at' => now()->subDay(),
         ]);
     }
 

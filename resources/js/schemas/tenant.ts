@@ -2,9 +2,12 @@ import { z } from 'zod';
 
 export const tenantSchema = z.object({
     name: z.string().min(1, 'Name is required').max(255),
-    plan: z.string().max(100).optional().or(z.literal('')),
     status: z.enum(['active', 'trial', 'suspended', 'cancelled']),
     locale: z.enum(['en', 'es']),
+    duration: z
+        .enum(['7_days', '14_days', '30_days', '1_month', '3_months', '6_months', '12_months'])
+        .optional()
+        .or(z.literal('')),
 });
 
 export type TenantValues = z.infer<typeof tenantSchema>;

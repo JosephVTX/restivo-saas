@@ -21,8 +21,14 @@ final class EnsureTenant
             abort(403, 'No hay un espacio de trabajo activo para esta solicitud.');
         }
 
-        if (! $this->context->require()->isActive()) {
-            abort(403, 'Este espacio de trabajo no está activo.');
+        $tenant = $this->context->require();
+
+        if (! $tenant->isActive()) {
+            abort(403, match (true) {
+                $tenant->hasExpired() && $tenant->isOnTrial() => 'Tu periodo de prueba ha finalizado.',
+                $tenant->hasExpired() => 'Tu plan ha vencido.',
+                default => 'Este espacio de trabajo no está activo.',
+            });
         }
 
         return $next($request);

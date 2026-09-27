@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\TenantStatus;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -73,5 +74,59 @@ class AdminTest extends TestCase
 
         app(PermissionRegistrar::class)->setPermissionsTeamId($tenant->id);
         $this->assertTrue($user->hasRole('member'));
+    }
+
+    public function test_a_super_admin_starts_a_trial_period(): void
+    {
+        $this->actingAs(User::factory()->superAdmin()->create());
+
+        $this->postJson('/api/v1/admin/tenants', [
+            'name' => 'Trial Co',
+            'duration' => '14_days',
+            'owner_name' => 'Owner',
+            'owner_email' => 'trial@example.com',
+            'owner_password' => 'secret-password',
+        ])->assertCreated();
+
+        $tenant = Tenant::where('name', 'Trial Co')->firstOrFail();
+
+        $this->assertSame(TenantStatus::Trial, $tenant->status);
+        $this->assertSame(14, $tenant->daysUntilExpiry());
+        $this->assertTrue($tenant->isActive());
+    }
+
+    public function test_a_super_admin_starts_a_paid_period(): void
+    {
+        $this->actingAs(User::factory()->superAdmin()->create());
+
+        $this->postJson('/api/v1/admin/tenants', [
+            'name' => 'Paid Co',
+            'duration' => '3_months',
+            'owner_name' => 'Owner',
+            'owner_email' => 'paid@example.com',
+            'owner_password' => 'secret-password',
+        ])->assertCreated();
+
+        $tenant = Tenant::where('name', 'Paid Co')->firstOrFail();
+
+        $this->assertSame(TenantStatus::Active, $tenant->status);
+        $this->assertNotNull($tenant->expires_at);
+        $this->assertTrue($tenant->expires_at->between(now()->addMonths(3)->subDay(), now()->addMonths(3)));
+    }
+
+    public function test_a_super_admin_renews_an_expired_tenant(): void
+    {
+        $tenant = Tenant::factory()->expiredTrial()->create();
+        $this->actingAs(User::factory()->superAdmin()->create());
+
+        $this->patchJson('/api/v1/admin/tenants/'.$tenant->uuid, [
+            'duration' => '12_months',
+        ])->assertOk();
+
+        $tenant->refresh();
+
+        $this->assertSame(TenantStatus::Active, $tenant->status);
+        $this->assertTrue($tenant->isActive());
+        $this->assertFalse($tenant->hasExpired());
     }
 }
