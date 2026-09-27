@@ -9,6 +9,7 @@ import { RowActions } from '@/components/ui/RowActions';
 import { SearchInput } from '@/components/ui/SearchInput';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { TableShell } from '@/components/ui/TableShell';
+import { useCan } from '@/hooks/use-can';
 import { useCrud } from '@/hooks/use-crud';
 import { useDebouncedSearch } from '@/hooks/use-debounced-search';
 import { useResource } from '@/hooks/use-resource';
@@ -35,6 +36,8 @@ const empty: ModifierGroupValues = {
 };
 
 export default function ModifiersIndex({ selection_types }: Props) {
+    const can = useCan();
+    const canManage = can('menu.manage');
     const { search, query, change, page, setPage } = useDebouncedSearch();
     const { items: groups, meta, isLoading, mutate } = useResource<ModifierGroup>('/api/v1/modifier-groups', {
         page,
@@ -94,9 +97,11 @@ export default function ModifiersIndex({ selection_types }: Props) {
                 title="Opciones"
                 description="Grupos de opciones (término, extras, salsas…) que se asignan a los productos."
                 actions={
-                    <button type="button" className="btn btn-primary btn-sm" onClick={crud.openCreate}>
-                        <i className="fa-solid fa-plus" aria-hidden="true" /> Nuevo grupo
-                    </button>
+                    canManage ? (
+                        <button type="button" className="btn btn-primary btn-sm" onClick={crud.openCreate}>
+                            <i className="fa-solid fa-plus" aria-hidden="true" /> Nuevo grupo
+                        </button>
+                    ) : undefined
                 }
             />
 
@@ -127,7 +132,10 @@ export default function ModifiersIndex({ selection_types }: Props) {
                                 />
                             </td>
                             <td>
-                                <RowActions onEdit={() => crud.openEdit(group)} onDelete={() => crud.remove(group)} />
+                                <RowActions
+                                    onEdit={canManage ? () => crud.openEdit(group) : undefined}
+                                    onDelete={canManage ? () => crud.remove(group) : undefined}
+                                />
                             </td>
                         </tr>
                     ))}

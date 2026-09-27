@@ -9,6 +9,7 @@ import { StatusBadge } from '@/components/ui/StatusBadge';
 import { useCan } from '@/hooks/use-can';
 import { useResource } from '@/hooks/use-resource';
 import { api, fetcher } from '@/lib/http';
+import { toast } from '@/lib/toast';
 import { cn } from '@/lib/utils';
 import type {
     DiningTable,
@@ -300,6 +301,7 @@ export default function PosIndex({ paymentMethodOptions }: Props) {
 
         await api.post(`/api/v1/orders/${order.uuid}/send`);
         await refreshOrder();
+        toast.success('Pedido enviado a cocina.');
     };
 
     const backToTables = () => {

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { ZodType } from 'zod';
 import { confirmDelete } from '@/components/ui/Modal';
 import { api, validationErrors } from '@/lib/http';
+import { toast } from '@/lib/toast';
 
 interface Entity {
     uuid: string;
@@ -76,6 +77,8 @@ export function useCrud<TValues, TEntity extends Entity>({
             await mutate?.();
             setOpen(false);
 
+            toast.success(editing ? 'Cambios guardados.' : 'Registro creado.');
+
             return entity;
         } catch (error) {
             const fieldErrors = validationErrors(error);
@@ -98,8 +101,16 @@ export function useCrud<TValues, TEntity extends Entity>({
             return;
         }
 
-        await api.delete(`${endpoint}/${entity.uuid}`);
-        await mutate?.();
+        try {
+            await api.delete(`${endpoint}/${entity.uuid}`);
+            await mutate?.();
+
+            toast.success('Registro eliminado.');
+        } catch (error) {
+            const errorMessage = (error as { response?: { data?: { message?: string } } })?.response?.data?.message;
+
+            toast.error(errorMessage ?? 'No se pudo eliminar el registro.');
+        }
     };
 
     return {

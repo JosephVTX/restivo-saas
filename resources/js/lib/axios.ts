@@ -1,4 +1,5 @@
 import { create } from 'axios';
+import { toast } from './toast';
 
 /**
  * Shared axios instance for the SPA.
@@ -24,6 +25,16 @@ http.interceptors.response.use(
 
         if (status === 401 && !window.location.pathname.startsWith('/login')) {
             window.location.href = '/login';
+        }
+
+        // Surface failures the page cannot render inline (422 keeps its field
+        // errors, and 401 already redirects).
+        if (status === 403) {
+            toast.error('No tienes permiso para realizar esta acción.');
+        } else if (status === 429) {
+            toast.error('Demasiadas solicitudes. Espera un momento.');
+        } else if (status !== undefined && status >= 500) {
+            toast.error('Ocurrió un error inesperado. Inténtalo de nuevo.');
         }
 
         return Promise.reject(error);

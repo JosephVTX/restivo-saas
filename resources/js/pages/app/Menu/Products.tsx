@@ -11,6 +11,7 @@ import { RowActions } from '@/components/ui/RowActions';
 import { SearchInput } from '@/components/ui/SearchInput';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { TableShell } from '@/components/ui/TableShell';
+import { useCan } from '@/hooks/use-can';
 import { useCrud } from '@/hooks/use-crud';
 import { useDebouncedSearch } from '@/hooks/use-debounced-search';
 import { useResource } from '@/hooks/use-resource';
@@ -75,6 +76,8 @@ export default function ProductsIndex({
     maxImagesPerProduct,
     cloudinaryConfigured,
 }: Props) {
+    const can = useCan();
+    const canManage = can('menu.manage');
     const { search, query, change, page, setPage } = useDebouncedSearch();
     const [category, setCategory] = useState('');
 
@@ -258,9 +261,11 @@ export default function ProductsIndex({
                 title="Carta"
                 description="Productos que se pueden vender en el salón."
                 actions={
-                    <button type="button" className="btn btn-primary btn-sm" onClick={openCreate}>
-                        <i className="fa-solid fa-plus" aria-hidden="true" /> Nuevo producto
-                    </button>
+                    canManage ? (
+                        <button type="button" className="btn btn-primary btn-sm" onClick={openCreate}>
+                            <i className="fa-solid fa-plus" aria-hidden="true" /> Nuevo producto
+                        </button>
+                    ) : undefined
                 }
             />
 
@@ -334,17 +339,19 @@ export default function ProductsIndex({
                             </td>
                             <td>
                                 <RowActions
-                                    onEdit={() => openEdit(product)}
-                                    onDelete={() => crud.remove(product)}
+                                    onEdit={canManage ? () => openEdit(product) : undefined}
+                                    onDelete={canManage ? () => crud.remove(product) : undefined}
                                     extra={
-                                        <button
-                                            type="button"
-                                            className="btn btn-ghost btn-xs"
-                                            title="Imagen"
-                                            onClick={() => openImages(product)}
-                                        >
-                                            <i className="fa-solid fa-image" aria-hidden="true" />
-                                        </button>
+                                        canManage ? (
+                                            <button
+                                                type="button"
+                                                className="btn btn-ghost btn-xs"
+                                                title="Imagen"
+                                                onClick={() => openImages(product)}
+                                            >
+                                                <i className="fa-solid fa-image" aria-hidden="true" />
+                                            </button>
+                                        ) : undefined
                                     }
                                 />
                             </td>

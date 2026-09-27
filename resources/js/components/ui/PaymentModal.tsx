@@ -3,6 +3,7 @@ import { Field } from '@/components/ui/Field';
 import { Modal } from '@/components/ui/Modal';
 import { api, validationErrors } from '@/lib/http';
 import { paymentMethodLabel } from '@/lib/labels';
+import { toast } from '@/lib/toast';
 import { cn } from '@/lib/utils';
 import { paymentSchema } from '@/schemas/payment';
 import type { EnumOption, Order, PaymentMethod } from '@/types';
@@ -96,6 +97,7 @@ export function PaymentModal({ order, paymentMethodOptions, onClose, onPaid }: P
             const fresh = await api.get<{ data: Order }>(`/api/v1/orders/${target.uuid}`);
             const updated = fresh.data;
 
+            toast.success(`Pago de #${updated.number} registrado.`);
             onPaid?.(updated);
 
             if (Number(updated.remaining) > 0.001) {

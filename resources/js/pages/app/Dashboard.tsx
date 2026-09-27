@@ -112,15 +112,21 @@ export default function AppDashboard({ rangeOptions }: Props) {
                             No tienes permiso para ver los reportes. Aquí tienes accesos rápidos para empezar.
                         </p>
                         <div className="flex flex-wrap gap-3">
-                            <Link href="/app/tables" className="btn btn-primary">
-                                <i className="fa-solid fa-chair" aria-hidden="true" /> Mesas
-                            </Link>
-                            <Link href="/app/pos" className="btn btn-outline">
-                                <i className="fa-solid fa-cash-register" aria-hidden="true" /> POS
-                            </Link>
-                            <Link href="/app/kitchen" className="btn btn-outline">
-                                <i className="fa-solid fa-fire-burner" aria-hidden="true" /> Cocina
-                            </Link>
+                            {can('tables.view') ? (
+                                <Link href="/app/tables" className="btn btn-primary">
+                                    <i className="fa-solid fa-chair" aria-hidden="true" /> Mesas
+                                </Link>
+                            ) : null}
+                            {can('orders.create') ? (
+                                <Link href="/app/pos" className="btn btn-outline">
+                                    <i className="fa-solid fa-cash-register" aria-hidden="true" /> POS
+                                </Link>
+                            ) : null}
+                            {can('kitchen.view') ? (
+                                <Link href="/app/kitchen" className="btn btn-outline">
+                                    <i className="fa-solid fa-fire-burner" aria-hidden="true" /> Cocina
+                                </Link>
+                            ) : null}
                         </div>
                     </div>
                 </div>

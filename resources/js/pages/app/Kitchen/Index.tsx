@@ -4,7 +4,9 @@ import useSWR from 'swr';
 import AppLayout from '@/components/layout/AppLayout';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { StatusBadge } from '@/components/ui/StatusBadge';
+import { useCan } from '@/hooks/use-can';
 import { api, fetcher } from '@/lib/http';
+import { toast } from '@/lib/toast';
 import { cn } from '@/lib/utils';
 import type { KitchenItem, OrderItemStatus } from '@/types';
 
@@ -47,6 +49,7 @@ function waitingClass(minutes: number): string {
 }
 
 export default function KitchenIndex() {
+    const canUpdate = useCan()('kitchen.update');
     const [station, setStation] = useState<StationFilter>('all');
     const [busy, setBusy] = useState<string | null>(null);
 
@@ -87,6 +90,7 @@ export default function KitchenIndex() {
         try {
             await api.patch(`/api/v1/order-items/${item.uuid}/status`, { status: action.status });
             await mutate();
+            toast.success('Comanda actualizada.');
         } finally {
             setBusy(null);
         }
@@ -192,7 +196,7 @@ export default function KitchenIndex() {
                                                         </span>
                                                     </div>
 
-                                                    {action ? (
+                                                    {action && canUpdate ? (
                                                         <button
                                                             type="button"
                                                             className={cn('btn h-14 w-full text-lg', action.className)}

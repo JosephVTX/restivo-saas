@@ -8,6 +8,7 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import { Pagination } from '@/components/ui/Pagination';
 import { RowActions } from '@/components/ui/RowActions';
 import { TableShell } from '@/components/ui/TableShell';
+import { useCan } from '@/hooks/use-can';
 import { useCrud } from '@/hooks/use-crud';
 import { useResource } from '@/hooks/use-resource';
 import { roleLabel } from '@/lib/labels';
@@ -22,6 +23,9 @@ interface Props {
 const empty: MemberValues = { email: '', role: 'member', job_title: '' };
 
 export default function MembersIndex({ roles }: Props) {
+    const can = useCan();
+    const canInvite = can('members.invite');
+    const canRemove = can('members.remove');
     const [page, setPage] = useState(1);
     const { items: members, meta, isLoading, mutate } = useResource<Membership>('/api/v1/members', { page });
 
@@ -40,9 +44,11 @@ export default function MembersIndex({ roles }: Props) {
                 title="Miembros"
                 description="Personas con acceso a este espacio de trabajo."
                 actions={
-                    <button type="button" className="btn btn-primary btn-sm" onClick={crud.openCreate}>
-                        <i className="fa-solid fa-user-plus" aria-hidden="true" /> Invitar
-                    </button>
+                    canInvite ? (
+                        <button type="button" className="btn btn-primary btn-sm" onClick={crud.openCreate}>
+                            <i className="fa-solid fa-user-plus" aria-hidden="true" /> Invitar
+                        </button>
+                    ) : undefined
                 }
             />
 
@@ -64,7 +70,7 @@ export default function MembersIndex({ roles }: Props) {
                             </td>
                             <td className="text-sm opacity-70">{formatDate(member.joined_at)}</td>
                             <td>
-                                <RowActions onDelete={() => crud.remove(member)} />
+                                <RowActions onDelete={canRemove ? () => crud.remove(member) : undefined} />
                             </td>
                         </tr>
                     ))}

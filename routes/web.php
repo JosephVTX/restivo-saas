@@ -85,21 +85,21 @@ Route::middleware(['auth', 'super-admin'])->prefix('admin')->name('admin.')->gro
 
 Route::middleware(['auth', 'tenant'])->prefix('app')->name('app.')->group(function () {
     Route::get('/', AppDashboardController::class)->name('dashboard');
-    Route::get('zones', [AppZoneController::class, 'index'])->name('zones');
-    Route::get('tables', [AppDiningTableController::class, 'index'])->name('tables');
-    Route::get('orders', [AppOrderController::class, 'index'])->name('orders');
-    Route::get('pos', [AppOrderController::class, 'pos'])->name('pos');
+    Route::get('zones', [AppZoneController::class, 'index'])->name('zones')->middleware('can:tables.manage');
+    Route::get('tables', [AppDiningTableController::class, 'index'])->name('tables')->middleware('can:tables.view');
+    Route::get('orders', [AppOrderController::class, 'index'])->name('orders')->middleware('can:orders.view');
+    Route::get('pos', [AppOrderController::class, 'pos'])->name('pos')->middleware('can:orders.create');
     Route::get('cash', [AppCashController::class, 'index'])->name('cash')->middleware('can:cash.view');
     Route::get('documents', [AppDocumentController::class, 'index'])->name('documents')->middleware('can:documents.view');
     Route::get('kitchen', [AppKitchenController::class, 'index'])->name('kitchen')->middleware('can:kitchen.view');
     Route::get('customers', [AppCustomerController::class, 'index'])->name('customers')->middleware('can:customers.view');
-    Route::get('menu/categories', [AppMenuCategoryController::class, 'index'])->name('menu.categories');
-    Route::get('menu/products', [AppProductController::class, 'index'])->name('menu.products');
-    Route::get('modifiers', [AppModifierGroupController::class, 'index'])->name('modifiers');
-    Route::get('members', [AppMemberController::class, 'index'])->name('members.index');
-    Route::get('roles', [AppRoleController::class, 'index'])->name('roles.index');
-    Route::get('settings', [TenantSettingsController::class, 'edit'])->name('settings.edit');
-    Route::put('settings', [TenantSettingsController::class, 'update'])->name('settings.update');
+    Route::get('menu/categories', [AppMenuCategoryController::class, 'index'])->name('menu.categories')->middleware('can:menu.view');
+    Route::get('menu/products', [AppProductController::class, 'index'])->name('menu.products')->middleware('can:menu.view');
+    Route::get('modifiers', [AppModifierGroupController::class, 'index'])->name('modifiers')->middleware('can:menu.view');
+    Route::get('members', [AppMemberController::class, 'index'])->name('members.index')->middleware('can:members.view');
+    Route::get('roles', [AppRoleController::class, 'index'])->name('roles.index')->middleware('can:roles.view');
+    Route::get('settings', [TenantSettingsController::class, 'edit'])->name('settings.edit')->middleware('can:settings.view');
+    Route::put('settings', [TenantSettingsController::class, 'update'])->name('settings.update')->middleware('can:settings.manage');
     Route::get('settings/billing', [AppBillingSettingController::class, 'edit'])->name('billing.settings')->middleware('can:billing.manage');
     Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('profile', [ProfileController::class, 'update'])->name('profile.update');

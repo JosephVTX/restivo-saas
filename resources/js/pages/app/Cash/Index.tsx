@@ -12,6 +12,7 @@ import { useCan } from '@/hooks/use-can';
 import { useResource } from '@/hooks/use-resource';
 import { api, fetcher, validationErrors } from '@/lib/http';
 import { cashMovementTypeLabel } from '@/lib/labels';
+import { toast } from '@/lib/toast';
 import { cn, formatDate } from '@/lib/utils';
 import { cashMovementSchema, closeCashSessionSchema, openCashSessionSchema } from '@/schemas/cash';
 import type {
@@ -120,6 +121,7 @@ export default function CashIndex({ paymentMethodOptions, cashMovementTypeOption
             setOpenNotes('');
             setClosedResult(null);
             await mutateCash();
+            toast.success('Caja abierta.');
         } catch (error) {
             setOpenErrors(errorsFor(error));
         } finally {
@@ -154,6 +156,7 @@ export default function CashIndex({ paymentMethodOptions, cashMovementTypeOption
             setCloseAmount('');
             setCloseNotes('');
             await mutateCash();
+            toast.success('Caja cerrada.');
         } catch (error) {
             setCloseErrors(errorsFor(error));
         } finally {
@@ -197,6 +200,7 @@ export default function CashIndex({ paymentMethodOptions, cashMovementTypeOption
             await api.post(`/api/v1/cash/sessions/${session.uuid}/movements`, parsed.data);
             setMovementOpen(false);
             await mutateCash();
+            toast.success('Movimiento registrado.');
         } catch (error) {
             setMovementErrors(errorsFor(error));
         } finally {
@@ -261,7 +265,7 @@ export default function CashIndex({ paymentMethodOptions, cashMovementTypeOption
                             <button
                                 type="button"
                                 className="btn btn-primary btn-lg h-16 text-lg"
-                                disabled={opening}
+                                disabled={opening || !can('cash.manage')}
                                 onClick={openSession}
                             >
                                 {opening ? (

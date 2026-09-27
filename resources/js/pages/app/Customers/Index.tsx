@@ -11,6 +11,7 @@ import { SearchInput } from '@/components/ui/SearchInput';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { StatusFilter } from '@/components/ui/StatusFilter';
 import { TableShell } from '@/components/ui/TableShell';
+import { useCan } from '@/hooks/use-can';
 import { useCrud } from '@/hooks/use-crud';
 import { useDebouncedSearch } from '@/hooks/use-debounced-search';
 import { useResource } from '@/hooks/use-resource';
@@ -38,6 +39,8 @@ const statusOptions = [
 ];
 
 export default function CustomersIndex({ identityDocumentTypeOptions }: Props) {
+    const can = useCan();
+    const canManage = can('customers.manage');
     const { search, query, change, page, setPage } = useDebouncedSearch();
     const [status, setStatus] = useState('');
     const { items: customers, meta, isLoading, mutate } = useResource<Customer>('/api/v1/customers', {
@@ -70,9 +73,11 @@ export default function CustomersIndex({ identityDocumentTypeOptions }: Props) {
                 title="Clientes"
                 description="Directorio de clientes para comprobantes y pedidos."
                 actions={
-                    <button type="button" className="btn btn-primary btn-sm" onClick={crud.openCreate}>
-                        <i className="fa-solid fa-plus" aria-hidden="true" /> Nuevo cliente
-                    </button>
+                    canManage ? (
+                        <button type="button" className="btn btn-primary btn-sm" onClick={crud.openCreate}>
+                            <i className="fa-solid fa-plus" aria-hidden="true" /> Nuevo cliente
+                        </button>
+                    ) : undefined
                 }
             />
 
@@ -123,8 +128,8 @@ export default function CustomersIndex({ identityDocumentTypeOptions }: Props) {
                             </td>
                             <td>
                                 <RowActions
-                                    onEdit={() => crud.openEdit(customer)}
-                                    onDelete={() => crud.remove(customer)}
+                                    onEdit={canManage ? () => crud.openEdit(customer) : undefined}
+                                    onDelete={canManage ? () => crud.remove(customer) : undefined}
                                 />
                             </td>
                         </tr>

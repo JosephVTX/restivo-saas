@@ -9,6 +9,7 @@ import { Pagination } from '@/components/ui/Pagination';
 import { SearchInput } from '@/components/ui/SearchInput';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { StatusFilter } from '@/components/ui/StatusFilter';
+import { useCan } from '@/hooks/use-can';
 import { useCrud } from '@/hooks/use-crud';
 import { useDebouncedSearch } from '@/hooks/use-debounced-search';
 import { useResource } from '@/hooks/use-resource';
@@ -44,6 +45,8 @@ const empty: DiningTableValues = {
 };
 
 export default function TablesIndex({ statuses, zones }: Props) {
+    const can = useCan();
+    const canManage = can('tables.manage');
     const { search, query, change, page, setPage } = useDebouncedSearch();
     const [zone, setZone] = useState('');
     const [status, setStatus] = useState('');
@@ -90,9 +93,11 @@ export default function TablesIndex({ statuses, zones }: Props) {
                 title="Mesas"
                 description="Mapa del salón. Toca una mesa para editarla."
                 actions={
-                    <button type="button" className="btn btn-primary btn-sm" onClick={crud.openCreate}>
-                        <i className="fa-solid fa-plus" aria-hidden="true" /> Nueva mesa
-                    </button>
+                    canManage ? (
+                        <button type="button" className="btn btn-primary btn-sm" onClick={crud.openCreate}>
+                            <i className="fa-solid fa-plus" aria-hidden="true" /> Nueva mesa
+                        </button>
+                    ) : undefined
                 }
             />
 
@@ -142,24 +147,39 @@ export default function TablesIndex({ statuses, zones }: Props) {
                                     {group.name}
                                 </h2>
                                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-                                    {group.tables.map((table) => (
-                                        <button
-                                            key={table.uuid}
-                                            type="button"
-                                            onClick={() => crud.openEdit(table)}
-                                            className={cn(
-                                                'card min-h-28 items-center justify-center gap-2 border-2 p-3 text-center transition hover:shadow-md active:scale-[0.97]',
-                                                statusCard[table.status],
-                                            )}
-                                        >
-                                            <span className="text-lg font-bold leading-none">{table.name}</span>
-                                            <span className="text-xs opacity-70">
-                                                <i className="fa-solid fa-chair" aria-hidden="true" /> {table.capacity}{' '}
-                                                pers.
-                                            </span>
-                                            <StatusBadge status={table.status} label={table.status_label} />
-                                        </button>
-                                    ))}
+                                    {group.tables.map((table) => {
+                                        const cardClass = cn(
+                                            'card min-h-28 items-center justify-center gap-2 border-2 p-3 text-center',
+                                            statusCard[table.status],
+                                            canManage && 'transition hover:shadow-md active:scale-[0.97]',
+                                        );
+
+                                        const body = (
+                                            <>
+                                                <span className="text-lg font-bold leading-none">{table.name}</span>
+                                                <span className="text-xs opacity-70">
+                                                    <i className="fa-solid fa-chair" aria-hidden="true" /> {table.capacity}{' '}
+                                                    pers.
+                                                </span>
+                                                <StatusBadge status={table.status} label={table.status_label} />
+                                            </>
+                                        );
+
+                                        return canManage ? (
+                                            <button
+                                                key={table.uuid}
+                                                type="button"
+                                                onClick={() => crud.openEdit(table)}
+                                                className={cardClass}
+                                            >
+                                                {body}
+                                            </button>
+                                        ) : (
+                                            <div key={table.uuid} className={cardClass}>
+                                                {body}
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             </section>
                         ))}
@@ -177,7 +197,7 @@ export default function TablesIndex({ statuses, zones }: Props) {
                 onClose={crud.close}
                 footer={
                     <>
-                        {crud.editing ? (
+                        {crud.editing && canManage ? (
                             <button
                                 type="button"
                                 className="btn btn-ghost mr-auto text-error"

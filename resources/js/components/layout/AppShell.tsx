@@ -1,6 +1,7 @@
 import { Link, router } from '@inertiajs/react';
 import type { ReactNode } from 'react';
 import { TenantSwitcher } from '@/components/layout/TenantSwitcher';
+import { FlashToasts } from '@/components/ui/FlashToasts';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { useShared } from '@/hooks/use-shared';
 import { roleLabel } from '@/lib/labels';
@@ -35,6 +36,7 @@ export function AppShell({
     return (
         <div className="drawer lg:drawer-open">
             <input id="main-drawer" type="checkbox" className="drawer-toggle" />
+            <FlashToasts />
 
             <div className="drawer-content flex min-h-screen flex-col">
                 <header className="navbar sticky top-0 z-30 min-h-16 border-b border-base-300 bg-base-100/80 px-4 backdrop-blur">

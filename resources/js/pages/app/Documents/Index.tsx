@@ -16,6 +16,7 @@ import { useCan } from '@/hooks/use-can';
 import { useDebouncedSearch } from '@/hooks/use-debounced-search';
 import { useResource } from '@/hooks/use-resource';
 import { api, validationErrors } from '@/lib/http';
+import { toast } from '@/lib/toast';
 import { formatDate } from '@/lib/utils';
 import { issueDocumentSchema, type IssueDocumentValues } from '@/schemas/document';
 import type { Customer, Document, DocumentStatus, DocumentType, EnumOption, IdentityDocumentType, Order } from '@/types';
@@ -138,6 +139,7 @@ export default function DocumentsIndex({ documentTypeOptions, documentStatusOpti
             await api.post(`/api/v1/orders/${orderUuid}/documents`, parsed.data);
             setOpen(false);
             await mutate();
+            toast.success('Comprobante emitido.');
         } catch (error) {
             setErrors(errorsFor(error));
         } finally {
@@ -152,6 +154,7 @@ export default function DocumentsIndex({ documentTypeOptions, documentStatusOpti
 
         await api.post(`/api/v1/documents/${document.uuid}/annul`, {});
         await mutate();
+        toast.success(`Comprobante ${document.full_number} anulado.`);
     };
 
     return (

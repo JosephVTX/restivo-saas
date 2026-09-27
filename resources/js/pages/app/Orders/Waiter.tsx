@@ -8,6 +8,7 @@ import { StatusBadge } from '@/components/ui/StatusBadge';
 import { useCan } from '@/hooks/use-can';
 import { useResource } from '@/hooks/use-resource';
 import { api } from '@/lib/http';
+import { toast } from '@/lib/toast';
 import { cn } from '@/lib/utils';
 import type { EnumOption, Order, PaymentMethod } from '@/types';
 
@@ -43,6 +44,7 @@ export default function WaiterOrders({ paymentMethodOptions }: Props) {
     const send = async (order: Order) => {
         await api.post(`/api/v1/orders/${order.uuid}/send`);
         await mutate();
+        toast.success(`Pedido #${order.number} enviado a cocina.`);
     };
 
     return (

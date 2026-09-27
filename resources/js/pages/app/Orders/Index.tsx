@@ -15,6 +15,7 @@ import { useDebouncedSearch } from '@/hooks/use-debounced-search';
 import { useCan } from '@/hooks/use-can';
 import { useResource } from '@/hooks/use-resource';
 import { api } from '@/lib/http';
+import { toast } from '@/lib/toast';
 import { formatDate } from '@/lib/utils';
 import type { EnumOption, Order, OrderStatus, OrderType, PaymentMethod } from '@/types';
 
@@ -44,6 +45,7 @@ export default function OrdersIndex({ orderStatusOptions, orderTypeOptions, paym
     const send = async (order: Order) => {
         await api.post(`/api/v1/orders/${order.uuid}/send`);
         await mutate();
+        toast.success(`Pedido #${order.number} enviado a cocina.`);
     };
 
     const cancel = async (order: Order) => {
@@ -53,6 +55,7 @@ export default function OrdersIndex({ orderStatusOptions, orderTypeOptions, paym
 
         await api.post(`/api/v1/orders/${order.uuid}/cancel`);
         await mutate();
+        toast.success(`Pedido #${order.number} anulado.`);
     };
 
     return (
@@ -107,13 +110,15 @@ export default function OrdersIndex({ orderStatusOptions, orderTypeOptions, paym
                                 <RowActions
                                     extra={
                                         <>
-                                            <Link
-                                                href={`/app/pos?order=${order.uuid}`}
-                                                className="btn btn-ghost btn-xs"
-                                                title="Abrir en POS"
-                                            >
-                                                <i className="fa-solid fa-cash-register" aria-hidden="true" />
-                                            </Link>
+                                            {can('orders.create') ? (
+                                                <Link
+                                                    href={`/app/pos?order=${order.uuid}`}
+                                                    className="btn btn-ghost btn-xs"
+                                                    title="Abrir en POS"
+                                                >
+                                                    <i className="fa-solid fa-cash-register" aria-hidden="true" />
+                                                </Link>
+                                            ) : null}
                                             {can('payments.create') && Number(order.remaining) > 0.001 ? (
                                                 <button
                                                     type="button"
@@ -133,7 +138,7 @@ export default function OrdersIndex({ orderStatusOptions, orderTypeOptions, paym
                                                     <i className="fa-solid fa-file-invoice" aria-hidden="true" />
                                                 </Link>
                                             ) : null}
-                                            {order.status === 'open' ? (
+                                            {order.status === 'open' && can('orders.update') ? (
                                                 <button
                                                     type="button"
                                                     className="btn btn-ghost btn-xs"
@@ -143,14 +148,16 @@ export default function OrdersIndex({ orderStatusOptions, orderTypeOptions, paym
                                                     <i className="fa-solid fa-paper-plane" aria-hidden="true" />
                                                 </button>
                                             ) : null}
-                                            <button
-                                                type="button"
-                                                className="btn btn-ghost btn-xs text-error"
-                                                title="Anular"
-                                                onClick={() => cancel(order)}
-                                            >
-                                                <i className="fa-solid fa-ban" aria-hidden="true" />
-                                            </button>
+                                            {can('orders.cancel') ? (
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-ghost btn-xs text-error"
+                                                    title="Anular"
+                                                    onClick={() => cancel(order)}
+                                                >
+                                                    <i className="fa-solid fa-ban" aria-hidden="true" />
+                                                </button>
+                                            ) : null}
                                         </>
                                     }
                                 />

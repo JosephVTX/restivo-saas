@@ -9,6 +9,7 @@ import { RowActions } from '@/components/ui/RowActions';
 import { SearchInput } from '@/components/ui/SearchInput';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { TableShell } from '@/components/ui/TableShell';
+import { useCan } from '@/hooks/use-can';
 import { useCrud } from '@/hooks/use-crud';
 import { useDebouncedSearch } from '@/hooks/use-debounced-search';
 import { useResource } from '@/hooks/use-resource';
@@ -29,6 +30,8 @@ const empty: MenuCategoryValues = {
 };
 
 export default function MenuCategories({ stations }: Props) {
+    const can = useCan();
+    const canManage = can('menu.manage');
     const { search, query, change, page, setPage } = useDebouncedSearch();
     const { items: categories, meta, isLoading, mutate } = useResource<MenuCategory>('/api/v1/menu-categories', {
         page,
@@ -58,9 +61,11 @@ export default function MenuCategories({ stations }: Props) {
                 title="Categorías"
                 description="Agrupa los productos de la carta."
                 actions={
-                    <button type="button" className="btn btn-primary btn-sm" onClick={crud.openCreate}>
-                        <i className="fa-solid fa-plus" aria-hidden="true" /> Nueva categoría
-                    </button>
+                    canManage ? (
+                        <button type="button" className="btn btn-primary btn-sm" onClick={crud.openCreate}>
+                            <i className="fa-solid fa-plus" aria-hidden="true" /> Nueva categoría
+                        </button>
+                    ) : undefined
                 }
             />
 
@@ -97,8 +102,8 @@ export default function MenuCategories({ stations }: Props) {
                             </td>
                             <td>
                                 <RowActions
-                                    onEdit={() => crud.openEdit(category)}
-                                    onDelete={() => crud.remove(category)}
+                                    onEdit={canManage ? () => crud.openEdit(category) : undefined}
+                                    onDelete={canManage ? () => crud.remove(category) : undefined}
                                 />
                             </td>
                         </tr>
