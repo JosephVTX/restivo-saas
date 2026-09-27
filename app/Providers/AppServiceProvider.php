@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Inertia\ExceptionResponse;
 use Inertia\Inertia;
@@ -21,6 +22,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Behind the Dokploy/Traefik TLS terminator the forwarded scheme is not
+        // reliable, so force https for every generated URL in production.
+        if ($this->app->environment('production')) {
+            URL::forceScheme('https');
+        }
+
         Inertia::handleExceptionsUsing(function (ExceptionResponse $response): ?ExceptionResponse {
             if ($response->request->is('api/*')) {
                 return null;
