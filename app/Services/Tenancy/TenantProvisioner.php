@@ -48,11 +48,6 @@ final class TenantProvisioner
         'reports.view',
         // Facturación electrónica
         'billing.manage',
-        // Recursos base (proyectos de ejemplo)
-        'projects.view',
-        'projects.create',
-        'projects.update',
-        'projects.delete',
         'members.view',
         'members.invite',
         'members.remove',
@@ -76,7 +71,6 @@ final class TenantProvisioner
             'documents.view', 'documents.create',
             'customers.view', 'customers.manage',
             'reports.view',
-            'projects.view', 'projects.create', 'projects.update', 'projects.delete',
             'members.view', 'members.invite', 'members.remove',
             'roles.view', 'settings.view',
         ],
@@ -107,7 +101,6 @@ final class TenantProvisioner
             'tables.view',
             'orders.view', 'orders.create', 'orders.update',
             'kitchen.view',
-            'projects.view', 'projects.create', 'projects.update',
             'members.view', 'settings.view',
         ],
     ];

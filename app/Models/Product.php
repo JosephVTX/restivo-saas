@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable([
-    'menu_category_id', 'name', 'description', 'sku', 'price', 'cost', 'tax_type',
+    'menu_category_id', 'name', 'code', 'description', 'sku', 'price', 'cost', 'tax_type',
     'station', 'unit', 'is_available', 'track_stock', 'stock', 'image_path',
     'sort_order', 'is_active',
 ])]

@@ -44,7 +44,9 @@ class MenuController extends ApiController
                 'products' => $products->map(fn (Product $product): array => [
                     'uuid' => $product->uuid,
                     'name' => $product->name,
+                    'code' => $product->code,
                     'description' => $product->description,
+                    'image_url' => $product->image_path ?? $product->images->first()?->url,
                     'price' => $product->price,
                     'is_available' => $product->is_available,
                     'tax_type' => $product->tax_type->value,

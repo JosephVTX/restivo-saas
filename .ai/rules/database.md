@@ -13,7 +13,7 @@
 
 ## Example resource
 
-`App\Models\Project` is the reference tenant-scoped resource. Copy its shape
+`App\Models\Product` is the reference tenant-scoped resource. Copy its shape
 (traits, casts, unique slug per tenant) when adding new resources.
 
 ## Migrations
@@ -31,7 +31,7 @@
 
 ## Factories & seeders
 
-- `TenantFactory`, `MembershipFactory`, `ProjectFactory`, `UserFactory`
+- `TenantFactory`, `MembershipFactory`, `ProductFactory`, `UserFactory`
   (`->superAdmin()`, `->forTenant($tenant, 'owner')`).
 - Seeders: `RolePermissionSeeder`, `SuperAdminSeeder`, `DemoTenantSeeder`.
 

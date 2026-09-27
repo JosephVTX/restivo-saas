@@ -45,9 +45,9 @@ type-hint tenant models in controller signatures. Instead accept the uuid and
 query with the scope already applied:
 
 ```php
-public function update(UpdateProjectRequest $request, string $project): ProjectResource
+public function update(UpdateProductRequest $request, string $product): ProductResource
 {
-    $model = Project::query()->where('uuid', $project)->firstOrFail(); // scoped
+    $model = Product::query()->where('uuid', $product)->firstOrFail(); // scoped
     ...
 }
 ```
@@ -58,7 +58,7 @@ they have no global scope.
 ## Validation
 
 - Form requests in `app/Http/Requests/{Admin,App,Auth}`. `authorize()` checks a
-  policy/permission (e.g. `$this->user()->can('projects.update', $project)`).
+  policy/permission (e.g. `$this->user()->can('menu.manage')`).
 - Return Laravel's 422 JSON; the frontend maps it with `validationErrors()`.
 
 ## Resources

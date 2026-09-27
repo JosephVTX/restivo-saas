@@ -22,7 +22,6 @@ use App\Http\Controllers\Api\V1\OrderItemController as ApiOrderItemController;
 use App\Http\Controllers\Api\V1\PaymentController as ApiPaymentController;
 use App\Http\Controllers\Api\V1\ProductController as ApiProductController;
 use App\Http\Controllers\Api\V1\ProductImageController as ApiProductImageController;
-use App\Http\Controllers\Api\V1\ProjectController as ApiProjectController;
 use App\Http\Controllers\Api\V1\ReportController as ApiReportController;
 use App\Http\Controllers\Api\V1\RoleController as ApiRoleController;
 use App\Http\Controllers\Api\V1\ZoneController as ApiZoneController;
@@ -39,7 +38,6 @@ use App\Http\Controllers\App\ModifierGroupController as AppModifierGroupControll
 use App\Http\Controllers\App\OrderController as AppOrderController;
 use App\Http\Controllers\App\ProductController as AppProductController;
 use App\Http\Controllers\App\ProfileController;
-use App\Http\Controllers\App\ProjectController as AppProjectController;
 use App\Http\Controllers\App\RoleController as AppRoleController;
 use App\Http\Controllers\App\TenantSettingsController;
 use App\Http\Controllers\App\ZoneController as AppZoneController;
@@ -87,7 +85,6 @@ Route::middleware(['auth', 'super-admin'])->prefix('admin')->name('admin.')->gro
 
 Route::middleware(['auth', 'tenant'])->prefix('app')->name('app.')->group(function () {
     Route::get('/', AppDashboardController::class)->name('dashboard');
-    Route::get('projects', [AppProjectController::class, 'index'])->name('projects.index');
     Route::get('zones', [AppZoneController::class, 'index'])->name('zones');
     Route::get('tables', [AppDiningTableController::class, 'index'])->name('tables');
     Route::get('orders', [AppOrderController::class, 'index'])->name('orders');
@@ -119,12 +116,6 @@ Route::middleware(['auth', 'tenant', 'throttle:api'])
     ->name('api.')
     ->group(function () {
         Route::get('roles', [ApiRoleController::class, 'index'])->name('roles.index');
-
-        Route::get('projects', [ApiProjectController::class, 'index'])->name('projects.index');
-        Route::post('projects', [ApiProjectController::class, 'store'])->name('projects.store');
-        Route::get('projects/{project}', [ApiProjectController::class, 'show'])->name('projects.show');
-        Route::patch('projects/{project}', [ApiProjectController::class, 'update'])->name('projects.update');
-        Route::delete('projects/{project}', [ApiProjectController::class, 'destroy'])->name('projects.destroy');
 
         Route::get('zones', [ApiZoneController::class, 'index'])->name('zones.index');
         Route::post('zones', [ApiZoneController::class, 'store'])->name('zones.store');

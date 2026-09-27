@@ -30,7 +30,7 @@ class TenantController extends ApiController
                 AllowedFilter::partial('plan'),
             ],
             sorts: ['name', 'status', 'created_at'],
-            withCount: ['memberships', 'projects'],
+            withCount: ['memberships'],
         ));
     }
 

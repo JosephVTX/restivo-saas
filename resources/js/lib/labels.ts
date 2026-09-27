@@ -24,7 +24,7 @@ export function roleLabel(name?: string | null): string {
  * identifiers in the database/APIs; only the UI translates.
  */
 const statusLabels: Record<string, string> = {
-    // Tenant / project
+    // Tenant
     draft: 'Borrador',
     active: 'Activo',
     trial: 'Prueba',

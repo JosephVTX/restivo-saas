@@ -98,13 +98,6 @@ export default function AppLayout({
             permission: 'menu.view',
         },
         {
-            href: '/app/projects',
-            label: 'Proyectos',
-            icon: 'fa-diagram-project',
-            active: matches('/app/projects'),
-            permission: 'projects.view',
-        },
-        {
             href: '/app/members',
             label: 'Miembros',
             icon: 'fa-users',

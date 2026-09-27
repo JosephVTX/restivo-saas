@@ -25,7 +25,7 @@ Octane (FrankenPHP) and Redis.
 
 ```
 app/
-  Enums/                     TenantStatus, ProjectStatus, Role
+  Enums/                     TenantStatus, Role
   Http/
     Controllers/
       Admin/                 Inertia pages for super admins
@@ -34,12 +34,12 @@ app/
       Auth/                  session login/register
     Middleware/              HandleInertiaRequests, ResolveTenant, EnsureTenant, EnsureSuperAdmin
     Requests/{Auth,Admin,App}
-    Resources/               ProjectResource, TenantResource, UserResource, ...
+    Resources/               ProductResource, TenantResource, UserResource, ...
   Models/
     Concerns/{BelongsToTenant,HasUuid}
     Scopes/TenantScope
-    Tenant, User, Membership, Project, Role
-  Policies/                  ProjectPolicy, MembershipPolicy, TenantPolicy
+    Tenant, User, Membership, Product, Role
+  Policies/                  ProductPolicy, MembershipPolicy, TenantPolicy
   Providers/                 AppServiceProvider, TenancyServiceProvider
   Services/Tenancy/          TenantProvisioner (roles/permissions), AccessGranter (grant client access)
   Support/Tenancy/           TenantContext, TenantResolver
@@ -49,7 +49,7 @@ resources/
     app.tsx                  createInertiaApp + SWR provider
     index.css                Tailwind v4 + daisyUI plugin
     components/{layout,ui}    shells, layouts, primitives
-    hooks/                   use-shared, use-theme, use-flash, use-projects, ...
+    hooks/                   use-shared, use-theme, use-flash, ...
     lib/                     axios, http (fetcher/api), swr, query, utils
     pages/                   Inertia pages (path must match render target)
     schemas/                 zod schemas
@@ -58,7 +58,7 @@ resources/
 docs/                        architecture + guides
 ```
 
-## Request lifecycle (tenant route, e.g. `GET /app/projects`)
+## Request lifecycle (tenant route, e.g. `GET /app/menu/products`)
 
 1. `web` middleware group starts the session and runs `HandleInertiaRequests`.
 2. `ResolveTenant` runs in the **`web` middleware group**: it reads the session
@@ -67,8 +67,8 @@ docs/                        architecture + guides
    relations. Route middleware then runs `auth` → `tenant` (and `throttle:api`
    on JSON routes).
 3. The controller renders the Inertia page with enum/shell props only.
-4. The React page mounts and its SWR hook fetches `/api/v1/projects` (same
-   session), which returns a `ProjectResource` collection scoped to the tenant.
+4. The React page mounts and its SWR hook fetches `/api/v1/products` (same
+   session), which returns a `ProductResource` collection scoped to the tenant.
 
 Because `SubstituteBindings` runs before `resolve.tenant`, tenant models are
 resolved with **explicit scoped queries** in controllers — never implicit

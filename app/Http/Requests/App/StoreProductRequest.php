@@ -38,6 +38,7 @@ class StoreProductRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
+            'code' => ['sometimes', 'nullable', 'string', 'max:30'],
             'description' => ['sometimes', 'nullable', 'string', 'max:255'],
             'sku' => ['sometimes', 'nullable', 'string', 'max:255'],
             'menu_category_id' => ['sometimes', 'nullable', Rule::exists('menu_categories', 'id')->where('tenant_id', current_tenant_id())],

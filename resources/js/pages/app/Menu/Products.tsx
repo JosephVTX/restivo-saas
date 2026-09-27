@@ -46,6 +46,7 @@ function imageErrorsFor(error: unknown): Record<string, string> {
 
 const empty: ProductValues = {
     name: '',
+    code: '',
     description: '',
     sku: '',
     menu_category_id: null,
@@ -162,6 +163,7 @@ export default function ProductsIndex({
         mutate,
         toValues: (product) => ({
             name: product.name,
+            code: product.code ?? '',
             description: product.description ?? '',
             sku: product.sku ?? '',
             menu_category_id: product.category?.uuid ?? null,
@@ -382,6 +384,17 @@ export default function ProductsIndex({
                             className="input w-full"
                             value={crud.values.name}
                             onChange={(event) => crud.setValues({ ...crud.values, name: event.target.value })}
+                        />
+                    </Field>
+                    <Field
+                        label="Código / Número"
+                        error={crud.errors.code}
+                        hint="Número con el que el mozo identifica el plato (ej. 1, 12A)."
+                    >
+                        <input
+                            className="input w-full"
+                            value={crud.values.code ?? ''}
+                            onChange={(event) => crud.setValues({ ...crud.values, code: event.target.value })}
                         />
                     </Field>
                     <Field label="Imagen" error={crud.errors.image}>

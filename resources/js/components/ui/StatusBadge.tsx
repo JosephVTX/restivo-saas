@@ -2,7 +2,7 @@ import { statusLabel } from '@/lib/labels';
 import { cn } from '@/lib/utils';
 
 const colors: Record<string, string> = {
-    // Tenant / project
+    // Tenant
     draft: 'badge-ghost',
     active: 'badge-success',
     trial: 'badge-info',

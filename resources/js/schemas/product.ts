@@ -10,6 +10,7 @@ const nullableNumber = z.preprocess(
 
 export const productSchema = z.object({
     name: z.string().min(1, 'El nombre es obligatorio').max(255),
+    code: z.string().max(30).optional().or(z.literal('')),
     description: z.string().max(255).optional().or(z.literal('')),
     sku: z.string().max(255).optional().or(z.literal('')),
     menu_category_id: z

@@ -23,7 +23,7 @@ class RoleLabelsTest extends TestCase
 
         $permissionLabels = collect($roles->firstWhere('name', 'owner')['permissions'])->pluck('label')->all();
 
-        $this->assertContains('Ver proyectos', $permissionLabels);
-        $this->assertNotContains('projects.view', $permissionLabels);
+        $this->assertContains('Ver miembros', $permissionLabels);
+        $this->assertNotContains('members.view', $permissionLabels);
     }
 }

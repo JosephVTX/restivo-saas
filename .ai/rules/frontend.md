@@ -16,7 +16,7 @@ mutations, **zod** for client validation, Tailwind v4 + daisyUI v5, **oxlint**
   `flash`, `app`) — see `app/Http/Middleware/HandleInertiaRequests.php`.
 - Lists/data come from `useResource<T>(endpoint, params)` (`hooks/use-resource.ts`)
   hitting `/api/v1/*`. The global fetcher is `lib/http.ts` (`fetcher`). There are
-  **no per-resource list hooks**: call `useResource<Project>('/api/v1/projects',
+  **no per-resource list hooks**: call `useResource<Product>('/api/v1/products',
   { page, filter: { search, status } })` and use the returned `items`.
 - Mutations use `api.post/patch/delete` then `mutate()` to revalidate, and
   `validationErrors(error)` to map 422 responses onto form fields.
@@ -40,7 +40,7 @@ existing generic pieces. Only add a new generic under `components/ui` or
 - **CRUD:** `hooks/use-crud` handles modal open/edit/values/errors/saving and
   create/update/delete + SWR revalidation (pass `endpoint`, `schema`, `empty`,
   `toValues`, `mutate`, `removeLabel`). Combined with `useResource` it is
-  the whole pattern. Reference: `pages/app/Projects/Index.tsx`.
+  the whole pattern. Reference: `pages/app/Menu/Products.tsx`.
 - **Search:** `hooks/use-debounced-search` (never refetch per keystroke).
 - **Data access:** `lib/http` (`api`, `validationErrors`, `fetcher`),
   `lib/query` (`buildQuery`), and `hooks/use-resource` (generic SWR list). Map
@@ -59,7 +59,7 @@ in `http-layer.md`.
   both rendering `AppShell`. Auth pages use `AuthLayout`.
 - UI primitives in `components/ui/*` (Modal, Pagination, StatusBadge, ...).
 - Pages in `resources/js/pages/**` must match the Inertia page path exactly
-  (e.g. `Inertia::render('app/Projects/Index')` → `pages/app/Projects/Index.tsx`).
+  (e.g. `Inertia::render('app/Menu/Products')` → `pages/app/Menu/Products.tsx`).
 - Auth pages: only `pages/auth/Login.tsx` (registration is closed). The admin
   tenant screen (`pages/admin/Tenants.tsx`) creates tenants and grants access.
 - Use daisyUI semantic classes (`btn`, `card`, `badge`, `input`) and Font
@@ -103,9 +103,9 @@ reintroduce them — inputs will look broken/misaligned. Build every field with
   `useTheme()` which writes `data-theme`.
 - **All UI copy is Spanish (es).** Keep new strings in Spanish. The backend
   locale is `es` (`lang/es/validation.php`, `auth.php`, ...) and enum labels
-  (`TenantStatus`, `ProjectStatus`, `Role`) return Spanish.
+  (`TenantStatus`, `Role`) return Spanish.
 - Role **names** and permission **names** stay in English as technical
-  identifiers (`owner`/`admin`/`member`, `projects.view`). Their visible labels
+  identifiers (`owner`/`admin`/`member`, `menu.view`). Their visible labels
   come from `lang/es/roles.php` + `lang/es/permissions.php` (exposed by
   `RoleResource`) and `lib/labels.ts` `roleLabel()` for inline role names.
   **Never render the raw role/permission identifier.**

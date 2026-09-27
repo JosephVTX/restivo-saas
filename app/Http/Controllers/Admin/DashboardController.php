@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\TenantStatus;
 use App\Http\Controllers\Controller;
-use App\Models\Project;
 use App\Models\Tenant;
 use App\Models\User;
 use Inertia\Inertia;
@@ -19,7 +18,6 @@ class DashboardController extends Controller
                 'tenants' => Tenant::query()->count(),
                 'active_tenants' => Tenant::query()->where('status', TenantStatus::Active)->count(),
                 'users' => User::query()->count(),
-                'projects' => Project::withoutTenantScope()->count(),
             ],
         ]);
     }

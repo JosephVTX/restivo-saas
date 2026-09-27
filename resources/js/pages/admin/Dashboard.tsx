@@ -7,7 +7,6 @@ interface Props {
         tenants: number;
         active_tenants: number;
         users: number;
-        projects: number;
     };
 }
 
@@ -16,7 +15,6 @@ export default function AdminDashboard({ stats }: Props) {
         { label: 'Clientes', value: stats.tenants, icon: 'fa-building', color: 'text-primary' },
         { label: 'Clientes activos', value: stats.active_tenants, icon: 'fa-circle-check', color: 'text-success' },
         { label: 'Usuarios', value: stats.users, icon: 'fa-users', color: 'text-info' },
-        { label: 'Proyectos', value: stats.projects, icon: 'fa-diagram-project', color: 'text-warning' },
     ];
 
     return (
@@ -24,7 +22,7 @@ export default function AdminDashboard({ stats }: Props) {
             <Head title="Administración" />
             <PageHeader title="Resumen de la plataforma" description="Métricas globales de todos los clientes." />
 
-            <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {cards.map((card) => (
                     <div key={card.label} className="card border border-base-300 bg-base-100">
                         <div className="card-body gap-3">

@@ -28,7 +28,6 @@ class TenantResource extends JsonResource
             'trial_ends_at' => $this->trial_ends_at?->toIso8601String(),
             'suspended_at' => $this->suspended_at?->toIso8601String(),
             'members_count' => $this->whenCounted('memberships'),
-            'projects_count' => $this->whenCounted('projects'),
             'created_at' => $this->created_at?->toIso8601String(),
         ];
     }

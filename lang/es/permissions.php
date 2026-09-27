@@ -48,12 +48,6 @@ return [
     // Facturación electrónica
     'billing.manage' => 'Gestionar facturación electrónica',
 
-    // Recursos base (proyectos de ejemplo)
-    'projects.view' => 'Ver proyectos',
-    'projects.create' => 'Crear proyectos',
-    'projects.update' => 'Editar proyectos',
-    'projects.delete' => 'Eliminar proyectos',
-
     'members.view' => 'Ver miembros',
     'members.invite' => 'Invitar miembros',
     'members.remove' => 'Quitar miembros',

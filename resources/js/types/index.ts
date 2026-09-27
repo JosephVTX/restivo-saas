@@ -1,4 +1,3 @@
-export type ProjectStatus = 'draft' | 'active' | 'archived';
 export type TenantStatus = 'active' | 'trial' | 'suspended' | 'cancelled';
 export type RoleName = 'owner' | 'admin' | 'member';
 
@@ -27,21 +26,7 @@ export interface Tenant {
     trial_ends_at: string | null;
     suspended_at: string | null;
     members_count?: number;
-    projects_count?: number;
     created_at: string;
-}
-
-export interface Project {
-    uuid: string;
-    name: string;
-    slug: string;
-    description: string | null;
-    status: ProjectStatus;
-    status_label: string;
-    meta: Record<string, unknown> | null;
-    due_date: string | null;
-    created_at: string;
-    updated_at: string;
 }
 
 export interface Membership {
@@ -107,6 +92,7 @@ export interface ProductImage {
 export interface Product {
     uuid: string;
     name: string;
+    code: string | null;
     description: string | null;
     sku: string | null;
     price: string;
@@ -403,7 +389,9 @@ export interface MenuModifierGroup {
 export interface MenuProduct {
     uuid: string;
     name: string;
+    code: string | null;
     description: string | null;
+    image_url: string | null;
     price: string;
     is_available: boolean;
     tax_type: TaxType;

@@ -189,7 +189,7 @@ export default function Tenants({ statuses }: Props) {
 
             <div className="mt-4">
                 <TableShell
-                    head={['Cliente', 'Estado', 'Plan', 'Miembros', 'Proyectos', 'Creado', '']}
+                    head={['Cliente', 'Estado', 'Plan', 'Miembros', 'Creado', '']}
                     isLoading={isLoading}
                     isEmpty={tenants.length === 0}
                 >
@@ -204,7 +204,6 @@ export default function Tenants({ statuses }: Props) {
                             </td>
                             <td className="capitalize">{tenant.plan ?? '—'}</td>
                             <td className="tabular-nums">{tenant.members_count ?? 0}</td>
-                            <td className="tabular-nums">{tenant.projects_count ?? 0}</td>
                             <td className="text-sm opacity-70">{formatDate(tenant.created_at)}</td>
                             <td>
                                 <RowActions

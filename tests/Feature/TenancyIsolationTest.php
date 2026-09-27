@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Models\Project;
+use App\Models\DiningTable;
 use App\Services\Tenancy\TenantProvisioner;
 use App\Support\Tenancy\TenantContext;
 use App\Support\Tenancy\TenantResolver;
@@ -32,13 +32,13 @@ class TenancyIsolationTest extends TestCase
         $alpha = $this->createTenant('Alpha');
         $beta = $this->createTenant('Beta');
 
-        Project::factory()->count(3)->create(['tenant_id' => $alpha->id]);
-        Project::factory()->count(5)->create(['tenant_id' => $beta->id]);
+        DiningTable::factory()->count(3)->create(['tenant_id' => $alpha->id]);
+        DiningTable::factory()->count(5)->create(['tenant_id' => $beta->id]);
 
         app(TenantContext::class)->set($alpha);
 
-        $this->assertSame(3, Project::query()->count());
-        $this->assertSame(8, Project::withoutTenantScope()->count());
+        $this->assertSame(3, DiningTable::query()->count());
+        $this->assertSame(8, DiningTable::withoutTenantScope()->count());
     }
 
     public function test_auto_fills_tenant_id_from_context_on_create(): void
@@ -47,9 +47,9 @@ class TenancyIsolationTest extends TestCase
 
         app(TenantContext::class)->set($tenant);
 
-        $project = Project::create(['name' => 'Scoped project', 'status' => 'draft']);
+        $table = DiningTable::create(['name' => 'Scoped table']);
 
-        $this->assertSame($tenant->id, $project->tenant_id);
+        $this->assertSame($tenant->id, $table->tenant_id);
     }
 
     public function test_provisions_default_roles_when_a_tenant_is_created(): void
