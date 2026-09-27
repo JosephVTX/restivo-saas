@@ -25,6 +25,7 @@ class MenuController extends ApiController
             ->where('is_active', true)
             ->with([
                 'category',
+                'images',
                 'modifierGroups' => fn ($query) => $query->where('is_active', true),
                 'modifierGroups.modifiers' => fn ($query) => $query->where('is_active', true),
             ])

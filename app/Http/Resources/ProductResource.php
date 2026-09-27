@@ -36,6 +36,7 @@ class ProductResource extends JsonResource
             'is_active' => $this->is_active,
             'menu_category_id' => $this->menu_category_id,
             'category' => new MenuCategoryResource($this->whenLoaded('category')),
+            'images' => ProductImageResource::collection($this->whenLoaded('images')),
             'modifier_groups' => ModifierGroupResource::collection($this->whenLoaded('modifierGroups')),
             'created_at' => $this->created_at?->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),

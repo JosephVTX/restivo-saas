@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\PlatformSettingController as AdminPlatformSettingController;
 use App\Http\Controllers\Admin\TenantController as AdminTenantController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Api\V1\Admin\PlatformSettingController as ApiAdminPlatformSettingController;
 use App\Http\Controllers\Api\V1\Admin\TenantController as ApiAdminTenantController;
 use App\Http\Controllers\Api\V1\Admin\UserController as ApiAdminUserController;
 use App\Http\Controllers\Api\V1\BillingSettingController as ApiBillingSettingController;
@@ -19,6 +21,7 @@ use App\Http\Controllers\Api\V1\OrderController as ApiOrderController;
 use App\Http\Controllers\Api\V1\OrderItemController as ApiOrderItemController;
 use App\Http\Controllers\Api\V1\PaymentController as ApiPaymentController;
 use App\Http\Controllers\Api\V1\ProductController as ApiProductController;
+use App\Http\Controllers\Api\V1\ProductImageController as ApiProductImageController;
 use App\Http\Controllers\Api\V1\ProjectController as ApiProjectController;
 use App\Http\Controllers\Api\V1\ReportController as ApiReportController;
 use App\Http\Controllers\Api\V1\RoleController as ApiRoleController;
@@ -73,6 +76,7 @@ Route::middleware(['auth', 'super-admin'])->prefix('admin')->name('admin.')->gro
     Route::get('/', AdminDashboardController::class)->name('dashboard');
     Route::get('tenants', [AdminTenantController::class, 'index'])->name('tenants.index');
     Route::get('users', [AdminUserController::class, 'index'])->name('users.index');
+    Route::get('settings/integrations', [AdminPlatformSettingController::class, 'edit'])->name('settings.integrations');
 });
 
 /*
@@ -145,6 +149,8 @@ Route::middleware(['auth', 'tenant', 'throttle:api'])
         Route::get('products/{product}', [ApiProductController::class, 'show'])->name('products.show');
         Route::patch('products/{product}', [ApiProductController::class, 'update'])->name('products.update');
         Route::delete('products/{product}', [ApiProductController::class, 'destroy'])->name('products.destroy');
+        Route::post('products/{product}/images', [ApiProductImageController::class, 'store'])->name('products.images.store');
+        Route::delete('product-images/{image}', [ApiProductImageController::class, 'destroy'])->name('product-images.destroy');
 
         Route::get('modifier-groups', [ApiModifierGroupController::class, 'index'])->name('modifier-groups.index');
         Route::post('modifier-groups', [ApiModifierGroupController::class, 'store'])->name('modifier-groups.store');
@@ -213,4 +219,8 @@ Route::middleware(['auth', 'super-admin', 'throttle:api'])
         Route::delete('tenants/{tenant}', [ApiAdminTenantController::class, 'destroy'])->name('tenants.destroy');
         Route::post('tenants/{tenant}/members', [ApiAdminTenantController::class, 'grantAccess'])->name('tenants.members.store');
         Route::get('users', [ApiAdminUserController::class, 'index'])->name('users.index');
+
+        Route::get('settings/integrations', [ApiAdminPlatformSettingController::class, 'show'])->name('settings.integrations.show');
+        Route::put('settings/integrations', [ApiAdminPlatformSettingController::class, 'update'])->name('settings.integrations.update');
+        Route::post('settings/integrations/test', [ApiAdminPlatformSettingController::class, 'test'])->name('settings.integrations.test');
     });

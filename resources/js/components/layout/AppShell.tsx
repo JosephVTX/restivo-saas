@@ -75,14 +75,14 @@ export function AppShell({
                                 </li>
                                 {variant === 'app' ? (
                                     <li>
-                                        <Link href="/app/profile">
+                                        <Link href="/app/profile" prefetch>
                                             <i className="fa-solid fa-id-card" aria-hidden="true" /> Mi perfil
                                         </Link>
                                     </li>
                                 ) : null}
                                 {auth.user?.is_super_admin ? (
                                     <li>
-                                        <Link href={variant === 'admin' ? '/app' : '/admin'}>
+                                        <Link href={variant === 'admin' ? '/app' : '/admin'} prefetch>
                                             <i className="fa-solid fa-shuffle" aria-hidden="true" />
                                             {variant === 'admin' ? 'Ir al espacio de trabajo' : 'Panel de administración'}
                                         </Link>
@@ -125,6 +125,7 @@ export function AppShell({
                             <li key={item.href}>
                                 <Link
                                     href={item.href}
+                                    prefetch
                                     aria-current={item.active ? 'page' : undefined}
                                     className={cn('font-medium', item.active && 'menu-active')}
                                 >

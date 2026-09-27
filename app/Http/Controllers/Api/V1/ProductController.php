@@ -31,7 +31,7 @@ class ProductController extends ApiController
                 $this->searchFilter(['name', 'description', 'sku']),
             ],
             sorts: ['name', 'price', 'sort_order', 'created_at'],
-            with: ['category', 'modifierGroups'],
+            with: ['category', 'modifierGroups', 'images'],
         ));
     }
 
@@ -42,7 +42,7 @@ class ProductController extends ApiController
 
         $this->syncModifierGroups($product, $request->input('modifier_groups'));
 
-        return (new ProductResource($product->load('category', 'modifierGroups')))
+        return (new ProductResource($product->load('category', 'modifierGroups', 'images')))
             ->response()
             ->setStatusCode(201);
     }
@@ -50,7 +50,7 @@ class ProductController extends ApiController
     public function show(string $product): ProductResource
     {
         return new ProductResource(
-            $this->findByUuid(Product::class, $product)->load('category', 'modifierGroups'),
+            $this->findByUuid(Product::class, $product)->load('category', 'modifierGroups', 'images'),
         );
     }
 
@@ -61,7 +61,7 @@ class ProductController extends ApiController
 
         $this->syncModifierGroups($model, $request->input('modifier_groups'));
 
-        return new ProductResource($model->load('category', 'modifierGroups'));
+        return new ProductResource($model->load('category', 'modifierGroups', 'images'));
     }
 
     public function destroy(string $product): JsonResponse

@@ -7,6 +7,7 @@ use App\Enums\TaxType;
 use App\Http\Controllers\Controller;
 use App\Models\MenuCategory;
 use App\Models\ModifierGroup;
+use App\Models\PlatformSetting;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -14,9 +15,13 @@ class ProductController extends Controller
 {
     public function index(): Response
     {
+        $settings = PlatformSetting::current();
+
         return Inertia::render('app/Menu/Products', [
             'tax_types' => enum_options(TaxType::class),
             'stations' => enum_options(Station::class),
+            'maxImagesPerProduct' => $settings->max_images_per_product,
+            'cloudinaryConfigured' => $settings->cloudinaryConfigured(),
             'categories' => MenuCategory::query()
                 ->orderBy('sort_order')
                 ->orderBy('name')

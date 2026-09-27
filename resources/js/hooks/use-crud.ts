@@ -21,6 +21,7 @@ export function useCrud<TValues, TEntity extends Entity>({
     toValues,
     mutate,
     removeLabel,
+    afterSave,
 }: {
     endpoint: string;
     schema: ZodType<TValues>;
@@ -28,6 +29,7 @@ export function useCrud<TValues, TEntity extends Entity>({
     toValues?: (entity: TEntity) => TValues;
     mutate?: () => Promise<unknown> | void;
     removeLabel?: (entity: TEntity) => string;
+    afterSave?: (entity: TEntity) => Promise<void> | void;
 }) {
     const [open, setOpen] = useState(false);
     const [editing, setEditing] = useState<TEntity | null>(null);
@@ -64,16 +66,22 @@ export function useCrud<TValues, TEntity extends Entity>({
         setErrors({});
 
         try {
-            const response = editing
+            const body = editing
                 ? await api.patch<TEntity>(`${endpoint}/${editing.uuid}`, parsed.data)
                 : await api.post<TEntity>(endpoint, parsed.data);
 
+            const entity = (body as { data?: TEntity }).data ?? body;
+
+            await afterSave?.(entity);
             await mutate?.();
             setOpen(false);
 
-            return response;
+            return entity;
         } catch (error) {
-            setErrors(validationErrors(error));
+            const fieldErrors = validationErrors(error);
+            const message = (error as { response?: { data?: { message?: string } } })?.response?.data?.message;
+
+            setErrors(message && Object.keys(fieldErrors).length === 0 ? { message } : fieldErrors);
 
             return null;
         } finally {

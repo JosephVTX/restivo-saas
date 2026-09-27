@@ -25,6 +25,13 @@ export default defineConfig({
         },
     },
     server: {
+        warmup: {
+            clientFiles: [
+                './resources/js/app.tsx',
+                './resources/js/pages/**/*.tsx',
+                './resources/js/components/**/*.tsx',
+            ],
+        },
         watch: {
             ignored: ['**/storage/framework/views/**'],
         },

@@ -93,6 +93,17 @@ export interface MenuCategory {
     updated_at: string;
 }
 
+export interface ProductImage {
+    uuid: string;
+    url: string;
+    format: string | null;
+    width: number | null;
+    height: number | null;
+    bytes: number | null;
+    sort_order: number;
+    created_at: string;
+}
+
 export interface Product {
     uuid: string;
     name: string;
@@ -113,6 +124,7 @@ export interface Product {
     is_active: boolean;
     menu_category_id: number | null;
     category?: MenuCategory | null;
+    images?: ProductImage[];
     modifier_groups?: ModifierGroup[];
     created_at: string;
     updated_at: string;
@@ -350,6 +362,18 @@ export interface BillingSetting {
     igv_rate: string;
     has_certificate: boolean;
     is_electronic_configured: boolean;
+}
+
+export interface PlatformSetting {
+    cloudinary_enabled: boolean;
+    cloudinary_cloud_name: string | null;
+    cloudinary_api_key: string | null;
+    cloudinary_folder: string | null;
+    max_images_per_product: number;
+    image_max_width: number;
+    webp_quality: number;
+    has_secret: boolean;
+    is_configured: boolean;
 }
 
 export interface MenuCategorySummary {
