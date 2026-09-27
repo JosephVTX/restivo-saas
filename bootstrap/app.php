@@ -16,6 +16,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Behind Dokploy/Traefik the TLS terminator forwards over HTTP, so trust
+        // the proxy headers to generate https:// URLs and secure cookies.
+        $middleware->trustProxies(at: '*');
+
         // ResolveTenant runs in the web group before HandleInertiaRequests so
         // the tenant context and the permission team id are resolved before
         // Inertia captures the shared props (auth.roles/permissions, tenant).
