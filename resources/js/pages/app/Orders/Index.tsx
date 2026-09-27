@@ -5,6 +5,7 @@ import { confirmDelete } from '@/components/ui/Modal';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Pagination } from '@/components/ui/Pagination';
+import { PaymentModal } from '@/components/ui/PaymentModal';
 import { RowActions } from '@/components/ui/RowActions';
 import { SearchInput } from '@/components/ui/SearchInput';
 import { StatusBadge } from '@/components/ui/StatusBadge';
@@ -15,22 +16,24 @@ import { useCan } from '@/hooks/use-can';
 import { useResource } from '@/hooks/use-resource';
 import { api } from '@/lib/http';
 import { formatDate } from '@/lib/utils';
-import type { EnumOption, Order, OrderStatus, OrderType } from '@/types';
+import type { EnumOption, Order, OrderStatus, OrderType, PaymentMethod } from '@/types';
 
 interface Props {
     orderStatusOptions: EnumOption<OrderStatus>[];
     orderTypeOptions: EnumOption<OrderType>[];
+    paymentMethodOptions: EnumOption<PaymentMethod>[];
 }
 
 function formatPrice(value: string): string {
     return `S/ ${Number(value ?? 0).toFixed(2)}`;
 }
 
-export default function OrdersIndex({ orderStatusOptions, orderTypeOptions }: Props) {
+export default function OrdersIndex({ orderStatusOptions, orderTypeOptions, paymentMethodOptions }: Props) {
     const can = useCan();
     const { search, query, change, page, setPage } = useDebouncedSearch();
     const [status, setStatus] = useState('');
     const [type, setType] = useState('');
+    const [payingOrder, setPayingOrder] = useState<Order | null>(null);
 
     const { items: orders, meta, isLoading, mutate } = useResource<Order>('/api/v1/orders', {
         page,
@@ -112,13 +115,14 @@ export default function OrdersIndex({ orderStatusOptions, orderTypeOptions }: Pr
                                                 <i className="fa-solid fa-cash-register" aria-hidden="true" />
                                             </Link>
                                             {can('payments.create') && Number(order.remaining) > 0.001 ? (
-                                                <Link
-                                                    href="/app/cash"
+                                                <button
+                                                    type="button"
                                                     className="btn btn-ghost btn-xs"
                                                     title="Cobrar"
+                                                    onClick={() => setPayingOrder(order)}
                                                 >
                                                     <i className="fa-solid fa-hand-holding-dollar" aria-hidden="true" />
-                                                </Link>
+                                                </button>
                                             ) : null}
                                             {order.status === 'paid' && can('documents.create') ? (
                                                 <Link
@@ -159,6 +163,16 @@ export default function OrdersIndex({ orderStatusOptions, orderTypeOptions }: Pr
             <div className="mt-4">
                 <Pagination meta={meta} onChange={setPage} />
             </div>
+
+            <PaymentModal
+                key={payingOrder?.uuid ?? 'closed'}
+                order={payingOrder}
+                paymentMethodOptions={paymentMethodOptions}
+                onClose={() => setPayingOrder(null)}
+                onPaid={() => {
+                    void mutate();
+                }}
+            />
         </AppLayout>
     );
 }

@@ -16,6 +16,7 @@ class OrderController extends Controller
         return Inertia::render('app/Orders/Index', [
             'orderStatusOptions' => enum_options(OrderStatus::class),
             'orderTypeOptions' => enum_options(OrderType::class),
+            'paymentMethodOptions' => enum_options(PaymentMethod::class),
         ]);
     }
 
