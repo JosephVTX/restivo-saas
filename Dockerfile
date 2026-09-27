@@ -36,6 +36,10 @@ COPY --from=assets /app/public/build ./public/build
 
 RUN php artisan storage:link || true
 
+RUN chmod +x docker/entrypoint.sh
+
 EXPOSE 8000
+
+ENTRYPOINT ["sh", "docker/entrypoint.sh"]
 
 CMD ["php", "artisan", "octane:start", "--server=frankenphp", "--host=0.0.0.0", "--port=8000", "--workers=auto", "--task-workers=auto", "--max-requests=500"]
