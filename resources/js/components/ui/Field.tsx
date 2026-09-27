@@ -19,15 +19,16 @@ export function Field({
     children: ReactNode;
 }) {
     return (
-        <fieldset className="fieldset">
+        <fieldset className="fieldset min-w-0">
             <legend className="fieldset-legend">{label}</legend>
             {children}
             {error ? (
-                <p className="label text-error">
-                    <i className="fa-solid fa-circle-exclamation" aria-hidden="true" /> {error}
+                <p className="mt-1 flex items-start gap-1.5 text-sm text-error">
+                    <i className="fa-solid fa-circle-exclamation mt-0.5 shrink-0" aria-hidden="true" />
+                    <span className="min-w-0 break-words">{error}</span>
                 </p>
             ) : hint ? (
-                <p className="label">{hint}</p>
+                <p className="mt-1 text-sm opacity-60">{hint}</p>
             ) : null}
         </fieldset>
     );
